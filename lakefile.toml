@@ -1,0 +1,42 @@
+name = "CollatzND"
+defaultTargets = ["CollatzND"]
+
+# Mathlib is pinned to the version used by Mazur's formalization (Lean v4.30.0-rc2).
+[[require]]
+name = "mathlib"
+git = "https://github.com/leanprover-community/mathlib4"
+rev = "v4.30.0-rc2"
+
+# L. Mazur, "Natural-density Collatz descent in logarithmic time" (ProofAtlas, commit ca3dd0d, Apache-2.0).
+# Not redistributed here: fetch_mazur.py downloads it, checks SHA-256 hashes, and unpacks it into vendor/mazur.
+[[lean_lib]]
+name = "Erdos1135"
+srcDir = "vendor/mazur"
+globs = ["Erdos1135.+"]
+
+[[lean_lib]]
+name = "FormalConjectures"
+srcDir = "vendor/mazur"
+globs = ["FormalConjectures.+"]
+
+# I. A. Shaik, "FirstPassageLinearTransport" (GitHub, commit 7239f88, Apache-2.0): the import closure of FixedBarrier.lean.
+# fetch_shaik.py fetches it and applies patches/shaik-v4.30.patch (port to v4.30.0-rc2 and the new file FixedBarrier.lean),
+# placing the result in vendor/shaik.
+[[lean_lib]]
+name = "FirstPassageLinearTransport"
+srcDir = "vendor/shaik"
+globs = ["FirstPassageLinearTransport.AdjustableBarrierDensity", "FirstPassageLinearTransport.AdjustableEnvelope", "FirstPassageLinearTransport.Barrier", "FirstPassageLinearTransport.BarrierDensity", "FirstPassageLinearTransport.Basic", "FirstPassageLinearTransport.Density", "FirstPassageLinearTransport.EntropyBarrier", "FirstPassageLinearTransport.Envelope", "FirstPassageLinearTransport.FirstBadEnvelope", "FirstPassageLinearTransport.FirstPassage", "FirstPassageLinearTransport.FixedBarrier", "FirstPassageLinearTransport.LossTransport", "FirstPassageLinearTransport.NestedRecertification", "FirstPassageLinearTransport.Parameters", "FirstPassageLinearTransport.Parity", "FirstPassageLinearTransport.PolylogTerminalSchedule", "FirstPassageLinearTransport.Pullback", "FirstPassageLinearTransport.RankScaledLoss", "FirstPassageLinearTransport.RawDynamics", "FirstPassageLinearTransport.RecertificationRun", "FirstPassageLinearTransport.RecertificationStep", "FirstPassageLinearTransport.TerminalProfile", "FirstPassageLinearTransport.TerminalTail", "FirstPassageLinearTransport.TerminalTailAsymptotics", "FirstPassageLinearTransport.Transport"]
+moreLeanArgs = ["-DmaxHeartbeats=20000000", "-DautoImplicit=false", "-DrelaxedAutoImplicit=false"]
+
+# The part of this project's supporting library used by the main theorem (minimal closure; the rest of the
+# library, which contains earlier results, stays in the source repository).
+[[lean_lib]]
+name = "CollatzProof"
+srcDir = "."
+globs = ["CollatzProof.Core.+"]
+
+# The main development: the minimal closure of the TAO-STAR main theorem (CollatzND.Core.*) and the
+# specification tests of its statement (CollatzND.Spec).
+[[lean_lib]]
+name = "CollatzND"
+globs = ["CollatzND.Core.+", "CollatzND.Spec"]

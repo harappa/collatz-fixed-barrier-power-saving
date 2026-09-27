@@ -1,0 +1,49 @@
+collatz-fixed-barrier-power-saving
+Copyright 2026 Hiroyuki Nashida
+
+This repository contains the Lean 4 formalization accompanying the preprint
+"A power-saving bound, uniform in the endpoint, for Collatz orbits that stay above a fixed barrier"
+by Hiroyuki Nashida (Zenodo, 2026, doi:10.5281/zenodo.22986670).
+It is licensed under the Apache License, Version 2.0; a copy of the license is in LICENSE.
+
+
+Third-party material included in this repository
+-------------------------------------------------
+
+patches/shaik-v4.30.patch is a derivative work of
+
+  FirstPassageLinearTransport, the Lean formalization accompanying I. A. Shaik,
+  "Polylogarithmic Descent for Almost All Collatz Orbits in Natural Density",
+  https://github.com/shaikidris/FirstPassageLinearTransport,
+  commit 7239f88d05d8262d4778f3c46f4560905052872f, directory lean/FirstPassageLinearTransport.
+  Copyright (c) 2026 Idris Ali Shaik.
+  Licensed under the Apache License, Version 2.0.
+
+The files were modified by this project (2026-09-25). As stated in the header of the patch:
+  (1) 19 of the 24 files used were ported from Lean v4.15.0 to Lean v4.30.0-rc2 / Mathlib v4.30.0-rc2.
+      No theorem or definition statement is changed; only proofs and notation (`∑ x in s` -> `∑ x ∈ s`,
+      Mathlib renamings, changed `field_simp` behaviour, imports -> `import Mathlib`).
+  (2) The new file FirstPassageLinearTransport/FixedBarrier.lean was added. It contains the fixed-target form
+      `fixedBarrier_failure_count` of the estimate behind Theorem 5.3 of Shaik's manuscript, assembled by this
+      project from existing lemmas of the library; it is not a theorem of the manuscript or a declaration of
+      Shaik's repository.
+The copyright notices in the headers of the original files are retained in the patched files. The original files
+are not included in this repository: fetch_shaik.py downloads them from the repository above, applies the patch,
+and checks the SHA-256 hashes of the result.
+
+No other file of this repository is derived from third-party code. The Lean files in CollatzND/ and CollatzProof/
+use the formalizations of Mazur and Shaik only through `import` and references to their declarations.
+
+
+Third-party material fetched at build time (not included in this repository)
+----------------------------------------------------------------------------
+
+- L. Mazur, "Natural-density Collatz descent in logarithmic time", Lean formalization hosted by ProofAtlas
+  (Natural-Density Logarithmic-Time Collatz Formalization), commit ca3dd0d63920411213403092aecc6946619eb082.
+  Copyright 2026 Advameg, Inc. Licensed under the Apache License, Version 2.0.
+  Downloaded by fetch_mazur.py and used unchanged; its own LICENSE and NOTICE files are unpacked into
+  vendor/mazur/. It contains retained Formal Conjectures material
+  (Copyright 2025 The Formal Conjectures Authors, Apache License, Version 2.0).
+
+- Mathlib, https://github.com/leanprover-community/mathlib4, tag v4.30.0-rc2, and its Lake dependencies
+  (pinned in lake-manifest.json), fetched by Lake. Apache License, Version 2.0 (lean4-cli: MIT License).

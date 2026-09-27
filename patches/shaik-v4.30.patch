@@ -1,0 +1,1267 @@
+# shaik-v4.30.patch -- changes to Idris Ali Shaik, "FirstPassageLinearTransport" (Apache-2.0)
+#
+# Origin: https://github.com/shaikidris/FirstPassageLinearTransport at commit
+#     7239f88d05d8262d4778f3c46f4560905052872f, directory lean/FirstPassageLinearTransport (Lean v4.15.0).
+# Modified by this project (2026-09-25). Per Section 4(b) of the Apache License 2.0, the changes are stated here:
+#   (1) Port to Lean v4.30.0-rc2 / Mathlib v4.30.0-rc2 (no theorem or definition statement is changed; only proofs
+#       and notation: `∑ x in s` -> `∑ x ∈ s`, Mathlib renamings, changed `field_simp` behaviour, imports -> `import Mathlib`).
+#   (2) New file FixedBarrier.lean: the fixed-target form `fixedBarrier_failure_count` of Theorem 5.3 (Section 5 of the
+#       manuscript, v3.2.4), assembled from existing lemmas of the library.
+# Application: fetch_shaik.py fetches, applies, and checks SHA-256 hashes.
+diff -ruN pa/FirstPassageLinearTransport/AdjustableBarrierDensity.lean pb/FirstPassageLinearTransport/AdjustableBarrierDensity.lean
+--- pa/FirstPassageLinearTransport/AdjustableBarrierDensity.lean	2026-09-25 19:32:24.229023949 +0900
++++ pb/FirstPassageLinearTransport/AdjustableBarrierDensity.lean	2026-09-25 19:32:24.231023951 +0900
+@@ -3,7 +3,7 @@
+ Released under Apache 2.0 license as described in the file LICENSE.
+ Authors: Idris Ali Shaik
+ -/
+-import Mathlib.Analysis.SpecialFunctions.Pow.Asymptotics
++import Mathlib
+ import FirstPassageLinearTransport.AdjustableEnvelope
+ import FirstPassageLinearTransport.BarrierDensity
+ 
+diff -ruN pa/FirstPassageLinearTransport/Barrier.lean pb/FirstPassageLinearTransport/Barrier.lean
+--- pa/FirstPassageLinearTransport/Barrier.lean	2026-09-25 19:32:24.255023980 +0900
++++ pb/FirstPassageLinearTransport/Barrier.lean	2026-09-25 19:32:24.258023984 +0900
+@@ -3,9 +3,7 @@
+ Released under Apache 2.0 license as described in the file LICENSE.
+ Authors: Idris Ali Shaik
+ -/
+-import Mathlib.Analysis.SpecialFunctions.Trigonometric.Series
+-import Mathlib.Data.Fintype.Card
+-import Mathlib.Logic.Equiv.Fin
++import Mathlib
+ import FirstPassageLinearTransport.Parity
+ import FirstPassageLinearTransport.Density
+ 
+@@ -373,12 +371,12 @@
+   calc
+     oddCount n (H + 1) =
+         (parityBit n 0 : ℕ) +
+-          ∑ i in Finset.range H, (parityBit n (i + 1) : ℕ) := by
++          ∑ i ∈ Finset.range H, (parityBit n (i + 1) : ℕ) := by
+       unfold oddCount
+       rw [Finset.sum_range_succ']
+       ac_rfl
+     _ = (parityBit n 0 : ℕ) +
+-          ∑ i in Finset.range H, (parityBit (shortcut n) i : ℕ) := by
++          ∑ i ∈ Finset.range H, (parityBit (shortcut n) i : ℕ) := by
+       congr 1
+     _ = (parityBit n 0 : ℕ) + oddCount (shortcut n) H := by
+       rfl
+diff -ruN pa/FirstPassageLinearTransport/BarrierDensity.lean pb/FirstPassageLinearTransport/BarrierDensity.lean
+--- pa/FirstPassageLinearTransport/BarrierDensity.lean	2026-09-25 19:32:24.268023996 +0900
++++ pb/FirstPassageLinearTransport/BarrierDensity.lean	2026-09-25 19:32:24.271024000 +0900
+@@ -126,7 +126,6 @@
+         unfold maximalBarrierHeight maximalBarrierC0
+         have hM : (0 : ℝ) < M + 1 := by positivity
+         field_simp [hlog]
+-        ring
+       calc
+         ((shellMaximalParityBad (M + 1)
+           (maximalBarrierHeight t (M + 1))).card : ℝ) ≤
+diff -ruN pa/FirstPassageLinearTransport/Density.lean pb/FirstPassageLinearTransport/Density.lean
+--- pa/FirstPassageLinearTransport/Density.lean	2026-09-25 19:32:24.295024029 +0900
++++ pb/FirstPassageLinearTransport/Density.lean	2026-09-25 19:32:24.298024032 +0900
+@@ -93,7 +93,6 @@
+         rw [show (1 : ℝ) - D = 1 + (-D) by ring,
+           Real.rpow_add hXR, Real.rpow_one]
+         field_simp
+-        ring
+   have hnonneg : ∀ X : ℕ, 0 ≤ (badCount S X : ℝ) / X := by
+     intro X
+     positivity
+@@ -243,7 +242,7 @@
+       calc
+         c / Real.log 2 * Real.log X ≤
+             c / Real.log 2 * (((L : ℝ) + 1) * Real.log 2) := h
+-        _ = ((L : ℝ) + 1) * c := by field_simp; ring
++        _ = ((L : ℝ) + 1) * c := by field_simp
+     push_cast
+     nlinarith [hmul]
+   have hrL :
+@@ -272,7 +271,6 @@
+     _ = 2 * K / (r - 1) *
+           ((X : ℝ) * (X : ℝ) ^ (-(c / Real.log 2))) := by
+       field_simp
+-      ring
+     _ = 2 * K / (r - 1) * (X : ℝ) ^ (1 - c / Real.log 2) := by
+       rw [hXrpow]
+ 
+diff -ruN pa/FirstPassageLinearTransport/EntropyBarrier.lean pb/FirstPassageLinearTransport/EntropyBarrier.lean
+--- pa/FirstPassageLinearTransport/EntropyBarrier.lean	2026-09-25 19:32:24.308024045 +0900
++++ pb/FirstPassageLinearTransport/EntropyBarrier.lean	2026-09-25 19:32:24.311024048 +0900
+@@ -3,7 +3,7 @@
+ Released under Apache 2.0 license as described in the file LICENSE.
+ Authors: Idris Ali Shaik
+ -/
+-import Mathlib.Analysis.SpecialFunctions.BinaryEntropy
++import Mathlib
+ import FirstPassageLinearTransport.Barrier
+ 
+ /-!
+@@ -140,8 +140,7 @@
+   rw [Real.sqrt_div hp.le, Real.sqrt_div hq.le,
+     Real.sqrt_mul hp.le]
+   field_simp [ne_of_gt hsp, ne_of_gt hsq]
+-  rw [hpq]
+-  ring
++  rw [Real.sq_sqrt hp.le, Real.sq_sqrt hq.le, hpq]
+ 
+ theorem cosh_booleanOptimizer
+     {t : ℝ} (ht0 : 0 ≤ t) (ht1 : t < 1 / 2) :
+diff -ruN pa/FirstPassageLinearTransport/Envelope.lean pb/FirstPassageLinearTransport/Envelope.lean
+--- pa/FirstPassageLinearTransport/Envelope.lean	2026-09-25 19:32:24.321024061 +0900
++++ pb/FirstPassageLinearTransport/Envelope.lean	2026-09-25 19:32:24.324024064 +0900
+@@ -3,7 +3,7 @@
+ Released under Apache 2.0 license as described in the file LICENSE.
+ Authors: Idris Ali Shaik
+ -/
+-import Mathlib.Algebra.GeomSum
++import Mathlib
+ import FirstPassageLinearTransport.Barrier
+ 
+ /-!
+@@ -89,7 +89,7 @@
+ 
+ /-- The normalized correction `r_k(n)` from equation (3.3). -/
+ def normalizedCorrection (k n : ℕ) : ℝ :=
+-  ∑ i in Finset.range k, normalizedCorrectionTerm k n i
++  ∑ i ∈ Finset.range k, normalizedCorrectionTerm k n i
+ 
+ theorem normalizedCorrectionTerm_nonneg (k n i : ℕ) :
+     0 ≤ normalizedCorrectionTerm k n i := by
+@@ -111,9 +111,8 @@
+       oddCount n (i + 1) +
+         (oddCount n k - oddCount n (i + 1)) := by omega
+   unfold normalizedCorrectionTerm
+-  rw [hsplit, pow_add]
++  rw [hsplit, pow_add, Nat.add_sub_cancel_left]
+   field_simp
+-  ring
+ 
+ /-- V2 exact affine iterate in the normalized correction coordinate used by
+ the paper. -/
+@@ -212,7 +211,6 @@
+           ((3 : ℝ) ^ oddCount n (i + 1) *
+             (2 : ℝ) ^ (k - i)) := by
+         field_simp
+-        ring
+   calc
+     _ ≤ (3 : ℝ) ^ h *
+           (3 : ℝ) ^ (((k - 1 - i : ℕ) : ℝ) / 2) /
+@@ -224,7 +222,6 @@
+       unfold rho
+       rw [div_pow]
+       field_simp
+-      ring
+ 
+ /-- The affine-correction estimate in the uniform form consumed downstream. -/
+ theorem normalizedCorrection_scaled_le_maximal
+@@ -363,7 +360,6 @@
+   unfold maximalBarrierHeight
+   have hlog : logTwoThree ≠ 0 := ne_of_gt logTwoThree_pos
+   field_simp [hlog]
+-  ring
+ 
+ theorem maximalBarrier_phase_half {n M : ℕ} {t : ℝ}
+     (ht : 0 ≤ t) (hnShell : n ∈ dyadicShell M) :
+@@ -590,7 +586,6 @@
+           unfold maximalBarrierHeight
+           have hlog : logTwoThree ≠ 0 := ne_of_gt logTwoThree_pos
+           field_simp [hlog]
+-          ring
+         _ = ((2 : ℝ) ^ M) ^ t := by
+           rw [mul_comm, Real.rpow_mul (by norm_num), Real.rpow_natCast]
+         _ ≤ (n : ℝ) ^ t := by
+diff -ruN pa/FirstPassageLinearTransport/FirstBadEnvelope.lean pb/FirstPassageLinearTransport/FirstBadEnvelope.lean
+--- pa/FirstPassageLinearTransport/FirstBadEnvelope.lean	2026-09-25 19:32:24.335024078 +0900
++++ pb/FirstPassageLinearTransport/FirstBadEnvelope.lean	2026-09-25 19:32:24.338024081 +0900
+@@ -94,7 +94,7 @@
+     _ ≤ ((2 : ℝ) ^ ((q - 1) + 1) *
+           Real.exp (-(((q - 1 : ℕ) : ℝ) *
+             binaryBarrierRate (adjustableBarrierDisplacement lambda t)))) + 1 :=
+-      add_le_add_right hshell 1
++      add_le_add_left hshell 1
+     _ = 1 + (2 : ℝ) ^ q *
+           Real.exp (-(((q - 1 : ℕ) : ℝ) *
+             binaryBarrierRate (adjustableBarrierDisplacement lambda t))) := by
+@@ -129,7 +129,7 @@
+     (hsmall : ∀ q ∈ Finset.Icc L U,
+       ((((q + 2 : ℕ) : ℚ) / r) / ((2 ^ q : ℕ) : ℚ)) ≤ 1 / 3) :
+     ((firstBadLandingEnvelope M L U H r t).card : ℚ) ≤
+-      ∑ q in Finset.Icc L U,
++      ∑ q ∈ Finset.Icc L U,
+         (H : ℚ) * (1 + 3 * (((q + 2 : ℕ) : ℚ) / r)) *
+           (2 : ℚ) ^ M / (2 : ℚ) ^ q * ((landingBad q t).card : ℚ) := by
+   classical
+@@ -138,17 +138,17 @@
+       (((q + 2 : ℕ) : ℚ) / r)
+   have houterQ :
+       ((firstBadLandingEnvelope M L U H r t).card : ℚ) ≤
+-        ∑ q in Finset.Icc L U,
++        ∑ q ∈ Finset.Icc L U,
+           ((lossFilteredTransportedSources M (2 ^ q) H (landingBad q t)
+             (((q + 2 : ℕ) : ℚ) / r)).card : ℚ) := by
+     unfold firstBadLandingEnvelope
+     exact_mod_cast houter
+   calc
+     ((firstBadLandingEnvelope M L U H r t).card : ℚ) ≤
+-        ∑ q in Finset.Icc L U,
++        ∑ q ∈ Finset.Icc L U,
+           ((lossFilteredTransportedSources M (2 ^ q) H (landingBad q t)
+             (((q + 2 : ℕ) : ℚ) / r)).card : ℚ) := houterQ
+-    _ ≤ ∑ q in Finset.Icc L U,
++    _ ≤ ∑ q ∈ Finset.Icc L U,
+         (H : ℚ) * (1 + 3 * (((q + 2 : ℕ) : ℚ) / r)) *
+           (2 : ℚ) ^ M / (2 : ℚ) ^ q * ((landingBad q t).card : ℚ) := by
+       apply Finset.sum_le_sum
+@@ -206,7 +206,7 @@
+     (hsmall : ∀ q ∈ Finset.Icc L U,
+       ((((q + 2 : ℕ) : ℚ) / r) / ((2 ^ q : ℕ) : ℚ)) ≤ 1 / 3) :
+     ((generatedFirstBadSources M L U H r t).card : ℚ) ≤
+-      ∑ q in Finset.Icc L U,
++      ∑ q ∈ Finset.Icc L U,
+         (H : ℚ) * (1 + 3 * (((q + 2 : ℕ) : ℚ) / r)) *
+           (2 : ℚ) ^ M / (2 : ℚ) ^ q * ((landingBad q t).card : ℚ) := by
+   have hcard := Finset.card_le_card
+diff -ruN pa/FirstPassageLinearTransport/FirstPassage.lean pb/FirstPassageLinearTransport/FirstPassage.lean
+--- pa/FirstPassageLinearTransport/FirstPassage.lean	2026-09-25 19:32:24.348024093 +0900
++++ pb/FirstPassageLinearTransport/FirstPassage.lean	2026-09-25 19:32:24.351024097 +0900
+@@ -58,7 +58,7 @@
+ 
+ /-- Product of all reverse factors through time `h`. -/
+ def reverseProduct (n h : ℕ) : ℚ :=
+-  ∏ i in Finset.range h, reverseStepFactor n i
++  ∏ i ∈ Finset.range h, reverseStepFactor n i
+ 
+ theorem reverseProduct_succ (n h : ℕ) :
+     reverseProduct n (h + 1) =
+@@ -144,7 +144,7 @@
+ 
+ theorem reverseProduct_eq_prod_loss (n h : ℕ) :
+     reverseProduct n h =
+-      ∏ i in Finset.range h, (1 - reverseLoss n i) := by
++      ∏ i ∈ Finset.range h, (1 - reverseLoss n i) := by
+   simp [reverseProduct, reverseStepFactor_eq_one_sub_reverseLoss]
+ 
+ theorem shortcut_gt_of_odd {x : ℕ} (hodd : x % 2 = 1) : x < shortcut x := by
+@@ -192,7 +192,7 @@
+ theorem one_sub_sum_le_prod {ι : Type*} [DecidableEq ι]
+     (s : Finset ι) (u : ι → ℚ)
+     (hu : ∀ i ∈ s, 0 ≤ u i ∧ u i ≤ 1) :
+-    1 - ∑ i in s, u i ≤ ∏ i in s, (1 - u i) := by
++    1 - ∑ i ∈ s, u i ≤ ∏ i ∈ s, (1 - u i) := by
+   induction s using Finset.induction_on with
+   | empty => simp
+   | @insert a s ha ih =>
+@@ -200,15 +200,15 @@
+       have hus : ∀ i ∈ s, 0 ≤ u i ∧ u i ≤ 1 := by
+         intro i hi
+         exact hu i (by simp [hi])
+-      have hsum : 0 ≤ ∑ i in s, u i :=
++      have hsum : 0 ≤ ∑ i ∈ s, u i :=
+         Finset.sum_nonneg fun i hi => (hus i hi).1
+       have hfactor : 0 ≤ 1 - u a := sub_nonneg.mpr hua.2
+       rw [Finset.sum_insert ha, Finset.prod_insert ha]
+       calc
+-        1 - (u a + ∑ i in s, u i) ≤
+-            (1 - u a) * (1 - ∑ i in s, u i) := by
++        1 - (u a + ∑ i ∈ s, u i) ≤
++            (1 - u a) * (1 - ∑ i ∈ s, u i) := by
+               nlinarith [hua.1]
+-        _ ≤ (1 - u a) * ∏ i in s, (1 - u i) :=
++        _ ≤ (1 - u a) * ∏ i ∈ s, (1 - u i) :=
+           mul_le_mul_of_nonneg_left (ih hus) hfactor
+ 
+ theorem reverseProduct_bounds {Y n h : ℕ}
+@@ -220,11 +220,11 @@
+     intro i hi
+     exact ⟨reverseLoss_nonneg n i, reverseLoss_le_one hn i⟩
+   have hsum :
+-      ∑ i in Finset.range h, reverseLoss n i ≤
++      ∑ i ∈ Finset.range h, reverseLoss n i ≤
+         (h : ℚ) / (2 * (Y : ℚ)) := by
+     calc
+-      ∑ i in Finset.range h, reverseLoss n i ≤
+-          ∑ _i in Finset.range h, (1 / (2 * (Y : ℚ)) : ℚ) := by
++      ∑ i ∈ Finset.range h, reverseLoss n i ≤
++          ∑ _i ∈ Finset.range h, (1 / (2 * (Y : ℚ)) : ℚ) := by
+             apply Finset.sum_le_sum
+             intro i hi
+             exact reverseLoss_le_firstPassage hY hfp (Finset.mem_range.mp hi)
+@@ -235,8 +235,8 @@
+   constructor
+   · calc
+       1 - (h : ℚ) / (2 * (Y : ℚ)) ≤
+-          1 - ∑ i in Finset.range h, reverseLoss n i := by linarith
+-      _ ≤ ∏ i in Finset.range h, (1 - reverseLoss n i) :=
++          1 - ∑ i ∈ Finset.range h, reverseLoss n i := by linarith
++      _ ≤ ∏ i ∈ Finset.range h, (1 - reverseLoss n i) :=
+         one_sub_sum_le_prod _ _ hloss
+   · apply Finset.prod_le_one
+     · intro i hi
+diff -ruN pa/FirstPassageLinearTransport/FixedBarrier.lean pb/FirstPassageLinearTransport/FixedBarrier.lean
+--- pa/FirstPassageLinearTransport/FixedBarrier.lean	1970-01-01 09:00:00.000000000 +0900
++++ pb/FirstPassageLinearTransport/FixedBarrier.lean	2026-09-25 19:32:24.361024109 +0900
+@@ -0,0 +1,508 @@
++/-
++Fixed-barrier failure bound, assembled from the library's existing lemmas.
++It is a fixed-target counterpart of the estimate behind Theorem 5.3 of the
++paper; the statement below is not a theorem of the paper.
++
++This file is an addition to the ported copy of Idris Ali Shaik's
++`FirstPassageLinearTransport` formalization (Apache-2.0).  It does not change
++any existing declaration.
++-/
++import FirstPassageLinearTransport.TerminalTailAsymptotics
++import FirstPassageLinearTransport.Parameters
++
++/-!
++# Fixed-barrier failure bound with a fixed target rank
++
++The library proves the two deterministic facts of Section 5 (nested direct
++first passage, `CertifiedRankChain.directFirstPassage`, and the rank-scaled
++reverse-loss budget, `CertifiedRankChain.scaledReverseLoss_le`), the literal
++re-certification run `RecertificationRun`, its conversion to a generated
++first-bad witness, and the terminal profile of the generated first-bad sources
++(`generatedFirstBadSources_density_terminalProfile`).
++
++What is added here is the semantic step of the proof of Theorem 5.3 for the
++fixed barrier: every source of the shell `[2^M, 2^(M+1))` whose shortcut orbit
++does not go below `2^L` up to time `H` (with `M ≤ (1-r)H`) either fails the
++initial certification or carries a generated first-bad landing at some rank in
++`[L, M-1]` within time `H` (`neverBelow_subset_failure`).  The time bound is
++the paper's (5.6), proved here through the invariant
++`(1-r)·elapsed + q ≤ M` (`run_elapsed_budget`).
++
++The parameters are fixed once and for all: `r = 7/8` (so `H = 8M`),
++`eta = 1/16`, and the entropy barrier of `AdjustableBarrierDensity` with
++`lambda = 1/2`.  Hence all constants in `fixedBarrier_failure_count_timed`,
++`fixedBarrier_failure_count_linear` and `fixedBarrier_failure_count` are
++absolute.  The rate is the explicit `fbFixedRate = min (fbRate/2) (log 2/2)`;
++the `_rate` forms state it, and the existential forms are corollaries.
++-/
++
++namespace FirstPassageLinearTransport
++
++namespace FixedBarrier
++
++open scoped BigOperators
++
++noncomputable section
++
++/-! ## Invariant along a re-certification run -/
++
++/-- Cumulative-time invariant of a certified run started in shell `M`:
++`(1 - r) * elapsed + q ≤ M`.  This is the paper's estimate (5.6) in a form
++that survives the induction. -/
++theorem run_elapsed_budget
++    {r : ℚ} {eta : ℝ} {p : StageSetup (r : ℝ) eta} {n elapsed q M : ℕ}
++    (hrun : RecertificationRun p n elapsed q) (hnShell : n ∈ dyadicShell M) :
++    (1 - (r : ℝ)) * (elapsed : ℝ) + (q : ℝ) ≤ (M : ℝ) := by
++  have hr0 : (0 : ℝ) ≤ (r : ℝ) := p.r_pos.le
++  have hr1 : (r : ℝ) < 1 := p.r_lt_one
++  have hgap : (0 : ℝ) ≤ 1 - (r : ℝ) := by linarith
++  induction hrun with
++  | @first m hm0 hnShell' hnGood =>
++      have hmM : m = M := by
++        rw [← log_two_eq_of_mem_dyadicShell hnShell',
++          log_two_eq_of_mem_dyadicShell hnShell]
++      subst hmM
++      have hlen : (stageLength p n : ℝ) ≤ (m : ℝ) := by
++        exact_mod_cast stageLength_le_shell p hm0 hnShell' hnGood
++      have hfloor : (rationalTargetRank r m : ℝ) ≤ (r : ℝ) * (m : ℝ) :=
++        Nat.floor_le (by positivity)
++      have hmul := mul_le_mul_of_nonneg_left hlen hgap
++      nlinarith
++  | @next elapsed qprev m hrun hm0 hsourceShell hsourceGood ih =>
++      have hfp := hrun.toCertifiedRankChain.directFirstPassage
++      have hpow : 2 ^ m ≤ 2 ^ qprev :=
++        (mem_dyadicShell.mp hsourceShell).1.trans hfp.1
++      have hmq : m ≤ qprev :=
++        (Nat.pow_le_pow_iff_right (by norm_num)).1 hpow
++      have hmqR : (m : ℝ) ≤ (qprev : ℝ) := by exact_mod_cast hmq
++      have hlen : (stageLength p (orbit elapsed n) : ℝ) ≤ (m : ℝ) := by
++        exact_mod_cast stageLength_le_shell p hm0 hsourceShell hsourceGood
++      have hfloor : (rationalTargetRank r m : ℝ) ≤ (r : ℝ) * (m : ℝ) :=
++        Nat.floor_le (by positivity)
++      have hmul := mul_le_mul_of_nonneg_left hlen hgap
++      have hih := ih
++      push_cast
++      nlinarith
++
++/-! ## The semantic step: never descending forces a first failure -/
++
++/-- A certified run whose source does not go below `2^L` up to time `H` ends,
++after finitely many further certified blocks, in a generated first-bad landing
++at a rank in `[L, M-1]` within the time horizon `H`. -/
++theorem run_firstBad_of_neverBelow
++    {r : ℚ} {eta : ℝ} {p : StageSetup (r : ℝ) eta} {n M L H : ℕ}
++    (hnShell : n ∈ dyadicShell M) (hL : p.M0 ≤ L) (hL1 : 1 ≤ L)
++    (hH : (M : ℝ) ≤ (1 - (r : ℝ)) * (H : ℝ))
++    (hnever : ∀ k : ℕ, k ≤ H → 2 ^ L ≤ orbit k n) :
++    ∀ q elapsed : ℕ, RecertificationRun p n elapsed q →
++      HasGeneratedFirstBadLanding r eta n L (M - 1) H := by
++  have hr0Q : (0 : ℚ) ≤ r := by exact_mod_cast p.r_pos.le
++  have hr1Q : r < 1 := by exact_mod_cast p.r_lt_one
++  have hr1 : (r : ℝ) < 1 := p.r_lt_one
++  intro q
++  induction q using Nat.strong_induction_on with
++  | h q ih =>
++      intro elapsed hrun
++      have hfp := hrun.toCertifiedRankChain.directFirstPassage
++      have hbud := run_elapsed_budget hrun hnShell
++      have hepos : 0 < elapsed := hrun.elapsed_pos
++      have heposR : (0 : ℝ) < (elapsed : ℝ) := by exact_mod_cast hepos
++      have hgap : (0 : ℝ) < 1 - (r : ℝ) := by linarith
++      have hqMR : (q : ℝ) < (M : ℝ) := by nlinarith
++      have hqM : q < M := by exact_mod_cast hqMR
++      have heH : elapsed ≤ H := by
++        have hqR : (0 : ℝ) ≤ (q : ℝ) := Nat.cast_nonneg q
++        have hle : (1 - (r : ℝ)) * (elapsed : ℝ) ≤ (1 - (r : ℝ)) * (H : ℝ) := by
++          linarith
++        have hleR : (elapsed : ℝ) ≤ (H : ℝ) := le_of_mul_le_mul_left hle hgap
++        exact_mod_cast hleR
++      have hxle : orbit elapsed n ≤ 2 ^ q := hfp.1
++      have hxge : 2 ^ L ≤ orbit elapsed n := hnever elapsed heH
++      have hLq : L ≤ q :=
++        (Nat.pow_le_pow_iff_right (by norm_num)).1 (hxge.trans hxle)
++      by_cases hgood : orbit elapsed n ∈ initialWindowGood eta
++      · let x := orbit elapsed n
++        let m := Nat.log 2 x
++        have hxpos : 0 < x := lt_of_lt_of_le (by positivity) hxge
++        have hxshell : x ∈ dyadicShell m := by
++          rw [mem_dyadicShell]
++          exact ⟨Nat.pow_log_le_self 2 hxpos.ne',
++            Nat.lt_pow_succ_log_self (by norm_num) x⟩
++        have hLm : L ≤ m := Nat.le_log_of_pow_le (by norm_num) hxge
++        have hmq : m ≤ q :=
++          (Nat.pow_le_pow_iff_right (by norm_num)).1
++            ((mem_dyadicShell.mp hxshell).1.trans hxle)
++        have hmpos : 0 < m := by omega
++        have hnext : rationalTargetRank r m < q :=
++          (rationalTargetRank_lt_parent hr0Q hr1Q hmpos).trans_le hmq
++        have nextRun := RecertificationRun.next hrun (hL.trans hLm) hxshell hgood
++        exact ih _ hnext _ nextRun
++      · exact hrun.toGeneratedFirstBadLanding hLq (by omega) heH hgood
++
++open scoped Classical in
++/-- Covering of the sources of one shell that do not go below `2^L` up to
++time `H` by the initial certification failures and the generated first-bad
++sources. -/
++theorem neverBelow_subset_failure
++    {r : ℚ} {eta : ℝ} (p : StageSetup (r : ℝ) eta) {M L H : ℕ}
++    (hLM : L ≤ M) (hL : p.M0 ≤ L) (hL1 : 1 ≤ L)
++    (hH : (M : ℝ) ≤ (1 - (r : ℝ)) * (H : ℝ)) :
++    ((dyadicShell M).filter (fun n => ∀ k : ℕ, k ≤ H → 2 ^ L ≤ orbit k n)) ⊆
++      shellInitialWindowBad M eta ∪
++        generatedFirstBadSources M L (M - 1) H r eta := by
++  classical
++  intro n hn
++  rw [Finset.mem_filter] at hn
++  rcases hn with ⟨hnShell, hnever⟩
++  rw [Finset.mem_union]
++  by_cases hgood : n ∈ initialWindowGood eta
++  · right
++    have hrun := RecertificationRun.first (p := p) (hL.trans hLM) hnShell hgood
++    exact mem_generatedFirstBadSources.mpr
++      ⟨hnShell, run_firstBad_of_neverBelow hnShell hL hL1 hH
++        hnever _ _ hrun⟩
++  · left
++    rw [← shellBad_initialWindowGood]
++    unfold shellBad
++    rw [Finset.mem_filter]
++    exact ⟨hnShell, hgood⟩
++
++/-! ## Fixed parameters `r = 7/8`, `eta = 1/16`, `lambda = 1/2` -/
++
++/-- The fixed rational contraction ratio `r = 7/8`. -/
++def fbR : ℚ := 7 / 8
++
++/-- The fixed certification tolerance `eta = 1/16`. -/
++def fbEta : ℝ := 1 / 16
++
++/-- `log₂ 3 < 13/8`, i.e. `3^8 = 6561 < 8192 = 2^13`. -/
++theorem logTwoThree_lt_thirteen_eighths : logTwoThree < 13 / 8 := by
++  unfold logTwoThree
++  have hlog2 : 0 < Real.log 2 := Real.log_pos (by norm_num)
++  rw [div_lt_iff₀ hlog2]
++  have h : Real.log ((3 : ℝ) ^ 8) < Real.log ((2 : ℝ) ^ 13) :=
++    Real.log_lt_log (by norm_num) (by norm_num)
++  rw [Real.log_pow, Real.log_pow] at h
++  push_cast at h
++  linarith
++
++theorem fbR_cast : ((fbR : ℚ) : ℝ) = 7 / 8 := by
++  unfold fbR
++  norm_num
++
++theorem fbR_pos : (0 : ℚ) < fbR := by
++  unfold fbR
++  norm_num
++
++theorem a0_lt_fbR : a0 < ((fbR : ℚ) : ℝ) := by
++  rw [fbR_cast]
++  unfold a0
++  linarith [logTwoThree_lt_thirteen_eighths]
++
++theorem fbEta_pos : 0 < fbEta := by
++  unfold fbEta
++  norm_num
++
++theorem fbEta_gap : fbEta < ((fbR : ℚ) : ℝ) - a0 := by
++  rw [fbR_cast]
++  unfold fbEta a0
++  linarith [logTwoThree_lt_thirteen_eighths]
++
++theorem fbEta_lt_a0 : fbEta < a0 := by
++  unfold fbEta a0
++  linarith [logTwoThree_one_lt]
++
++/-- The one-stage parameter package for the fixed parameters (Section 5,
++(5.1)-(5.2)); its startup rank `M0` is an absolute constant. -/
++theorem exists_fixedStageSetup :
++    Nonempty (StageSetup ((fbR : ℚ) : ℝ) fbEta) :=
++  exists_stageSetup a0_lt_fbR (by rw [fbR_cast]; norm_num) fbEta_pos fbEta_gap
++
++/-- The entropy rate of the adjustable barrier at `lambda = 1/2`,
++`t = eta = 1/16`. -/
++def fbRate : ℝ :=
++  binaryBarrierRate (adjustableBarrierDisplacement (1 / 2) fbEta)
++
++theorem fbRate_pos : 0 < fbRate := by
++  unfold fbRate binaryBarrierRate
++  apply sub_pos.mpr
++  rw [Real.binEntropy_lt_log_two]
++  have hd : 0 < adjustableBarrierDisplacement (1 / 2) fbEta := by
++    unfold adjustableBarrierDisplacement fbEta
++    exact div_pos (by norm_num) logTwoThree_pos
++  intro h
++  have : adjustableBarrierDisplacement (1 / 2) fbEta = 0 := by
++    norm_num at h
++    linarith
++  linarith
++
++/-- The explicit rate of the fixed-barrier bound. -/
++def fbFixedRate : ℝ := min (fbRate / 2) (Real.log 2 / 2)
++
++theorem fbFixedRate_pos : 0 < fbFixedRate :=
++  lt_min (by have := fbRate_pos; linarith) (by have := Real.log_pos (by norm_num : (1 : ℝ) < 2); linarith)
++
++/-- The reverse-loss budget `(q+2)/r` is small against the threshold `2^q`
++(the paper's (5.13)) for every `q ≥ 5`. -/
++theorem rank_budget_small {q : ℕ} (hq : 5 ≤ q) :
++    ((((q + 2 : ℕ) : ℚ) / fbR) / ((2 ^ q : ℕ) : ℚ)) ≤ 1 / 3 := by
++  have hnat : 24 * (q + 2) ≤ 7 * 2 ^ q := by
++    induction q, hq using Nat.le_induction with
++    | base => norm_num
++    | succ k hk ih =>
++        rw [pow_succ]
++        omega
++  have hQ : (24 : ℚ) * ((q + 2 : ℕ) : ℚ) ≤ 7 * ((2 ^ q : ℕ) : ℚ) := by
++    exact_mod_cast hnat
++  have hpos : (0 : ℚ) < ((2 ^ q : ℕ) : ℚ) := by positivity
++  unfold fbR
++  rw [div_le_iff₀ hpos, div_le_iff₀ (by norm_num)]
++  linarith
++
++/-! ## Assembly -/
++
++open scoped Classical in
++/-- Timed fixed-barrier failure bound with one linear factor in the shell
++rank: the number of `n ∈ [2^M, 2^(M+1))` whose shortcut orbit stays at or
++above `2^L` at every time `k ≤ 8M` is at most `C · 2^M · (M+1) · e^{-cL}`
++with the explicit rate `c = fbFixedRate` and absolute `C, L0`.
++(`8M = M/(1-r)` is the paper's horizon (5.6).) -/
++theorem fixedBarrier_failure_count_timed_rate :
++    ∃ C : ℝ, 0 < C ∧ ∃ L0 : ℕ, ∀ L M : ℕ, L0 ≤ L → L ≤ M →
++      (((dyadicShell M).filter
++          (fun n => ∀ k : ℕ, k ≤ 8 * M → 2 ^ L ≤ orbit k n)).card : ℝ)
++        ≤ C * 2 ^ M * ((M : ℝ) + 1) * Real.exp (-(fbFixedRate * L)) := by
++  unfold fbFixedRate
++  obtain ⟨p⟩ := exists_fixedStageSetup
++  have hb : 0 < fbRate := fbRate_pos
++  have hlog2 : 0 < Real.log 2 := Real.log_pos (by norm_num)
++  have hb' : 0 < fbRate / 2 := by positivity
++  have hbb' : fbRate / 2 < fbRate := by linarith
++  have hc' : 0 < Real.log 2 / 2 := by positivity
++  have hc2 : Real.log 2 / 2 < Real.log 2 := by linarith
++  -- eventual entropy-sharp landing-band bound (all higher ranks at once)
++  obtain ⟨L1, hL1⟩ := Filter.eventually_atTop.1
++    (eventually_interval_card_landingBad_adjustable_le
++      (lambda := 1 / 2) (t := fbEta) (by norm_num) (by norm_num)
++      fbEta_pos fbEta_lt_a0)
++  -- eventual entropy-sharp initial-shell bound
++  obtain ⟨M1, hM1⟩ := Filter.eventually_atTop.1
++    (eventually_card_shellInitialWindowBad_adjustable_le
++      (lambda := 1 / 2) (t := fbEta) (by norm_num) (by norm_num)
++      fbEta_pos fbEta_lt_a0)
++  set P := terminalTailPrefactor fbRate (fbRate / 2) (Real.log 2 / 2) with hPdef
++  have hP : 0 < P := terminalTailPrefactor_pos hb' hbb' hc' hc2
++  set K : ℝ := 1 + 6 / ((fbR : ℚ) : ℝ) with hKdef
++  have hK : 0 < K := by
++    rw [hKdef, fbR_cast]
++    norm_num
++  set c : ℝ := min (fbRate / 2) (Real.log 2 / 2) with hcdef
++  have hc : 0 < c := lt_min hb' hc'
++  refine ⟨2 + 8 * K * P, by positivity,
++    max (max p.M0 L1) (max M1 5), ?_⟩
++  intro L M hL0 hLM
++  have hLp : p.M0 ≤ L := le_trans (le_trans (le_max_left _ _) (le_max_left _ _)) hL0
++  have hLL1 : L1 ≤ L := le_trans (le_trans (le_max_right _ _) (le_max_left _ _)) hL0
++  have hMM1 : M1 ≤ M :=
++    le_trans (le_trans (le_trans (le_max_left _ _) (le_max_right _ _)) hL0) hLM
++  have hL5 : 5 ≤ L := le_trans (le_trans (le_max_right _ _) (le_max_right _ _)) hL0
++  have hLone : 1 ≤ L := by omega
++  have hH : (M : ℝ) ≤ (1 - ((fbR : ℚ) : ℝ)) * ((8 * M : ℕ) : ℝ) := by
++    rw [fbR_cast]
++    push_cast
++    linarith
++  -- covering of the failure set
++  have hsub := neverBelow_subset_failure (eta := fbEta) p hLM hLp hLone hH
++  have hcardNat :
++      ((dyadicShell M).filter
++          (fun n => ∀ k : ℕ, k ≤ 8 * M → 2 ^ L ≤ orbit k n)).card ≤
++        (shellInitialWindowBad M fbEta).card +
++          (generatedFirstBadSources M L (M - 1) (8 * M) fbR fbEta).card :=
++    (Finset.card_le_card hsub).trans (Finset.card_union_le _ _)
++  have hcard :
++      (((dyadicShell M).filter
++          (fun n => ∀ k : ℕ, k ≤ 8 * M → 2 ^ L ≤ orbit k n)).card : ℝ) ≤
++        ((shellInitialWindowBad M fbEta).card : ℝ) +
++          ((generatedFirstBadSources M L (M - 1) (8 * M) fbR fbEta).card : ℝ) := by
++    exact_mod_cast hcardNat
++  -- the exponential weight
++  set E : ℝ := Real.exp (-(c * (L : ℝ))) with hEdef
++  have hE : 0 < E := Real.exp_pos _
++  have hpowM : (0 : ℝ) < 2 ^ M := by positivity
++  have hLMR : (L : ℝ) ≤ (M : ℝ) := by exact_mod_cast hLM
++  have hL0R : (0 : ℝ) ≤ (L : ℝ) := Nat.cast_nonneg L
++  -- initial certification failures
++  have hA : ((shellInitialWindowBad M fbEta).card : ℝ) ≤ 2 * 2 ^ M * E := by
++    have h0 := hM1 M hMM1
++    have hexp : Real.exp (-((M : ℝ) *
++        binaryBarrierRate (adjustableBarrierDisplacement (1 / 2) fbEta))) ≤ E := by
++      rw [hEdef]
++      apply Real.exp_le_exp.mpr
++      have hcb : c ≤ fbRate := (min_le_left _ _).trans hbb'.le
++      change -((M : ℝ) * fbRate) ≤ -(c * (L : ℝ))
++      have h1 : c * (L : ℝ) ≤ fbRate * (L : ℝ) :=
++        mul_le_mul_of_nonneg_right hcb hL0R
++      have h2 : fbRate * (L : ℝ) ≤ fbRate * (M : ℝ) :=
++        mul_le_mul_of_nonneg_left hLMR hb.le
++      linarith
++    calc
++      ((shellInitialWindowBad M fbEta).card : ℝ) ≤
++          (2 : ℝ) ^ (M + 1) * Real.exp (-((M : ℝ) *
++            binaryBarrierRate (adjustableBarrierDisplacement (1 / 2) fbEta))) := h0
++      _ ≤ (2 : ℝ) ^ (M + 1) * E :=
++        mul_le_mul_of_nonneg_left hexp (by positivity)
++      _ = 2 * 2 ^ M * E := by rw [pow_succ]; ring
++  -- generated first-bad landings (paper Theorem 5.3, terminal profile)
++  have hB : ((generatedFirstBadSources M L (M - 1) (8 * M) fbR fbEta).card : ℝ) ≤
++      2 ^ M * (8 * (M : ℝ) * K * P * E) := by
++    have hsmall : ∀ q ∈ Finset.Icc L (M - 1),
++        ((((q + 2 : ℕ) : ℚ) / fbR) / ((2 ^ q : ℕ) : ℚ)) ≤ 1 / 3 := by
++      intro q hq
++      exact rank_budget_small (hL5.trans (Finset.mem_Icc.mp hq).1)
++    have hlanding : ∀ q ∈ Finset.Icc L (M - 1),
++        ((landingBad q fbEta).card : ℝ) ≤
++          1 + (2 : ℝ) ^ q * Real.exp (-(((q - 1 : ℕ) : ℝ) * fbRate)) :=
++      hL1 L hLL1 (M - 1)
++    have hprof := generatedFirstBadSources_density_terminalProfile
++      (M := M) (L := L) (U := M - 1) (H := 8 * M) (r := fbR) (t := fbEta)
++      fbR_pos (by omega) hLone hsmall hlanding hb' hbb' hc' hc2
++    have htail := terminalTailBound_le_minRate hb' hbb' hc' hc2 L
++    have hHK : (0 : ℝ) ≤ ((8 * M : ℕ) : ℝ) * (1 + 6 / ((fbR : ℚ) : ℝ)) := by
++      rw [fbR_cast]
++      positivity
++    have hdens :
++        ((generatedFirstBadSources M L (M - 1) (8 * M) fbR fbEta).card : ℝ) /
++            (2 : ℝ) ^ M ≤ 8 * (M : ℝ) * K * P * E := by
++      calc
++        ((generatedFirstBadSources M L (M - 1) (8 * M) fbR fbEta).card : ℝ) /
++            (2 : ℝ) ^ M ≤
++            ((8 * M : ℕ) : ℝ) * (1 + 6 / ((fbR : ℚ) : ℝ)) *
++              terminalTailBound fbRate (fbRate / 2) (Real.log 2 / 2) L := hprof
++        _ ≤ ((8 * M : ℕ) : ℝ) * (1 + 6 / ((fbR : ℚ) : ℝ)) *
++              (P * Real.exp (-(c * (L : ℝ)))) :=
++          mul_le_mul_of_nonneg_left htail hHK
++        _ = 8 * (M : ℝ) * K * P * E := by
++          rw [hKdef, hEdef]
++          push_cast
++          ring
++    rw [div_le_iff₀ hpowM] at hdens
++    linarith
++  -- final collection of the two terms
++  have hMR : (0 : ℝ) ≤ (M : ℝ) := Nat.cast_nonneg M
++  have hKP : 0 ≤ 8 * K * P := by positivity
++  have hfinal :
++      2 * 2 ^ M * E + 2 ^ M * (8 * (M : ℝ) * K * P * E) ≤
++        (2 + 8 * K * P) * 2 ^ M * ((M : ℝ) + 1) * E := by
++    have hbase : 0 ≤ 2 ^ M * E := by positivity
++    have hexpand :
++        (2 + 8 * K * P) * 2 ^ M * ((M : ℝ) + 1) * E -
++            (2 * 2 ^ M * E + 2 ^ M * (8 * (M : ℝ) * K * P * E)) =
++          (2 ^ M * E) * (2 * (M : ℝ) + 8 * K * P) := by
++      ring
++    have hnonneg : 0 ≤ (2 ^ M * E) * (2 * (M : ℝ) + 8 * K * P) :=
++      mul_nonneg hbase (by positivity)
++    linarith
++  calc
++    (((dyadicShell M).filter
++          (fun n => ∀ k : ℕ, k ≤ 8 * M → 2 ^ L ≤ orbit k n)).card : ℝ) ≤
++        ((shellInitialWindowBad M fbEta).card : ℝ) +
++          ((generatedFirstBadSources M L (M - 1) (8 * M) fbR fbEta).card : ℝ) := hcard
++    _ ≤ 2 * 2 ^ M * E + 2 ^ M * (8 * (M : ℝ) * K * P * E) := add_le_add hA hB
++    _ ≤ (2 + 8 * K * P) * 2 ^ M * ((M : ℝ) + 1) * E := hfinal
++
++open scoped Classical in
++/-- Untimed form with the explicit rate: the number of `n ∈ [2^M, 2^(M+1))`
++whose shortcut orbit never goes below `2^L` is at most
++`C · 2^M · (M+1) · e^{-cL}` with `c = fbFixedRate`. -/
++theorem fixedBarrier_failure_count_linear_rate :
++    ∃ C : ℝ, 0 < C ∧ ∃ L0 : ℕ, ∀ L M : ℕ, L0 ≤ L → L ≤ M →
++      (((dyadicShell M).filter (fun n => ∀ k : ℕ, 2 ^ L ≤ orbit k n)).card : ℝ)
++        ≤ C * 2 ^ M * ((M : ℝ) + 1) * Real.exp (-(fbFixedRate * L)) := by
++  obtain ⟨C, hC, L0, h⟩ := fixedBarrier_failure_count_timed_rate
++  refine ⟨C, hC, L0, ?_⟩
++  intro L M hL hLM
++  have hsub :
++      ((dyadicShell M).filter (fun n => ∀ k : ℕ, 2 ^ L ≤ orbit k n)) ⊆
++        ((dyadicShell M).filter
++          (fun n => ∀ k : ℕ, k ≤ 8 * M → 2 ^ L ≤ orbit k n)) := by
++    intro n hn
++    rw [Finset.mem_filter] at hn ⊢
++    exact ⟨hn.1, fun k _ => hn.2 k⟩
++  have hcard :
++      (((dyadicShell M).filter (fun n => ∀ k : ℕ, 2 ^ L ≤ orbit k n)).card : ℝ) ≤
++        (((dyadicShell M).filter
++          (fun n => ∀ k : ℕ, k ≤ 8 * M → 2 ^ L ≤ orbit k n)).card : ℝ) := by
++    exact_mod_cast Finset.card_le_card hsub
++  exact hcard.trans (h L M hL hLM)
++
++open scoped Classical in
++/-- **Fixed-barrier failure bound with a fixed target rank and the explicit
++rate** `c = fbFixedRate`: there are absolute constants `C > 0` and `L0` such
++that for all `L0 ≤ L ≤ M`, the number of `n ∈ [2^M, 2^(M+1))` whose shortcut
++orbit never goes below `2^L` is at most `C · 2^M · (M+1) · (L+1) · e^{-cL}`.
++(The factor `L+1 ≥ 1` is not needed for the bound; it is kept for the
++assembly that uses this statement.) -/
++theorem fixedBarrier_failure_count_rate :
++    ∃ C : ℝ, 0 < C ∧ ∃ L0 : ℕ, ∀ L M : ℕ, L0 ≤ L → L ≤ M →
++      (((Finset.Ico (2 ^ M) (2 ^ (M + 1))).filter
++          (fun n => ∀ k, 2 ^ L ≤ shortcut^[k] n)).card : ℝ)
++        ≤ C * 2 ^ M * ((M : ℝ) + 1) * ((L : ℝ) + 1) * Real.exp (-(fbFixedRate * L)) := by
++  obtain ⟨C, hC, L0, h⟩ := fixedBarrier_failure_count_linear_rate
++  refine ⟨C, hC, L0, ?_⟩
++  intro L M hL hLM
++  have hlin := h L M hL hLM
++  have hbase : 0 ≤ C * 2 ^ M * ((M : ℝ) + 1) * Real.exp (-(fbFixedRate * L)) := by
++    positivity
++  have hL1 : (1 : ℝ) ≤ (L : ℝ) + 1 := by
++    have : (0 : ℝ) ≤ (L : ℝ) := Nat.cast_nonneg L
++    linarith
++  calc
++    (((Finset.Ico (2 ^ M) (2 ^ (M + 1))).filter
++        (fun n => ∀ k, 2 ^ L ≤ shortcut^[k] n)).card : ℝ) =
++        (((dyadicShell M).filter (fun n => ∀ k : ℕ, 2 ^ L ≤ orbit k n)).card : ℝ) :=
++      rfl
++    _ ≤ C * 2 ^ M * ((M : ℝ) + 1) * Real.exp (-(fbFixedRate * L)) := hlin
++    _ = C * 2 ^ M * ((M : ℝ) + 1) * Real.exp (-(fbFixedRate * L)) * 1 := by ring
++    _ ≤ C * 2 ^ M * ((M : ℝ) + 1) * Real.exp (-(fbFixedRate * L)) * ((L : ℝ) + 1) :=
++      mul_le_mul_of_nonneg_left hL1 hbase
++    _ = C * 2 ^ M * ((M : ℝ) + 1) * ((L : ℝ) + 1) * Real.exp (-(fbFixedRate * L)) := by
++      ring
++
++open scoped Classical in
++/-- Timed form with an unspecified rate (corollary of the `_rate` form). -/
++theorem fixedBarrier_failure_count_timed :
++    ∃ C c : ℝ, 0 < C ∧ 0 < c ∧ ∃ L0 : ℕ, ∀ L M : ℕ, L0 ≤ L → L ≤ M →
++      (((dyadicShell M).filter
++          (fun n => ∀ k : ℕ, k ≤ 8 * M → 2 ^ L ≤ orbit k n)).card : ℝ)
++        ≤ C * 2 ^ M * ((M : ℝ) + 1) * Real.exp (-(c * L)) := by
++  obtain ⟨C, hC, L0, h⟩ := fixedBarrier_failure_count_timed_rate
++  exact ⟨C, fbFixedRate, hC, fbFixedRate_pos, L0, h⟩
++
++open scoped Classical in
++/-- Untimed form with an unspecified rate (corollary of the `_rate` form). -/
++theorem fixedBarrier_failure_count_linear :
++    ∃ C c : ℝ, 0 < C ∧ 0 < c ∧ ∃ L0 : ℕ, ∀ L M : ℕ, L0 ≤ L → L ≤ M →
++      (((dyadicShell M).filter (fun n => ∀ k : ℕ, 2 ^ L ≤ orbit k n)).card : ℝ)
++        ≤ C * 2 ^ M * ((M : ℝ) + 1) * Real.exp (-(c * L)) := by
++  obtain ⟨C, hC, L0, h⟩ := fixedBarrier_failure_count_linear_rate
++  exact ⟨C, fbFixedRate, hC, fbFixedRate_pos, L0, h⟩
++
++open scoped Classical in
++/-- **Fixed-barrier failure bound with a fixed target rank.**
++There are absolute constants `C, c > 0` and `L0` such that for all
++`L0 ≤ L ≤ M`, the number of `n ∈ [2^M, 2^(M+1))` whose shortcut orbit never
++goes below `2^L` is at most `C · 2^M · (M+1) · (L+1) · e^{-cL}`
++(corollary of `fixedBarrier_failure_count_rate`). -/
++theorem fixedBarrier_failure_count :
++    ∃ C c : ℝ, 0 < C ∧ 0 < c ∧ ∃ L0 : ℕ, ∀ L M : ℕ, L0 ≤ L → L ≤ M →
++      (((Finset.Ico (2 ^ M) (2 ^ (M + 1))).filter
++          (fun n => ∀ k, 2 ^ L ≤ shortcut^[k] n)).card : ℝ)
++        ≤ C * 2 ^ M * ((M : ℝ) + 1) * ((L : ℝ) + 1) * Real.exp (-(c * L)) := by
++  obtain ⟨C, hC, L0, h⟩ := fixedBarrier_failure_count_rate
++  exact ⟨C, fbFixedRate, hC, fbFixedRate_pos, L0, h⟩
++
++end
++
++end FixedBarrier
++
++end FirstPassageLinearTransport
+diff -ruN pa/FirstPassageLinearTransport/LossTransport.lean pb/FirstPassageLinearTransport/LossTransport.lean
+--- pa/FirstPassageLinearTransport/LossTransport.lean	2026-09-25 19:32:24.372024123 +0900
++++ pb/FirstPassageLinearTransport/LossTransport.lean	2026-09-25 19:32:24.375024126 +0900
+@@ -21,7 +21,7 @@
+ 
+ /-- Sum of the exact reverse losses through time `h`. -/
+ def reverseLossTotal (n h : ℕ) : ℚ :=
+-  ∑ i in Finset.range h, reverseLoss n i
++  ∑ i ∈ Finset.range h, reverseLoss n i
+ 
+ /-- Reverse loss rescaled by the landing threshold `Y`. -/
+ def scaledReverseLoss (Y n h : ℕ) : ℚ :=
+@@ -297,38 +297,38 @@
+       ∀ t ∈ Finset.range H,
+         (B.biUnion fun y =>
+             lossFilteredTaggedFiber M Y (t + 1) y D).card ≤
+-          ∑ y in B, (lossFilteredTaggedFiber M Y (t + 1) y D).card := by
++          ∑ y ∈ B, (lossFilteredTaggedFiber M Y (t + 1) y D).card := by
+     intro t _ht
+     exact card_biUnion_le_sum B fun y =>
+       lossFilteredTaggedFiber M Y (t + 1) y D
+   have hcardNat :
+       (lossFilteredTransportedSources M Y H B D).card ≤
+-        ∑ t in Finset.range H, ∑ y in B,
++        ∑ t ∈ Finset.range H, ∑ y ∈ B,
+           (lossFilteredTaggedFiber M Y (t + 1) y D).card := by
+     unfold lossFilteredTransportedSources
+     calc
+       ((Finset.range H).biUnion fun t =>
+           B.biUnion fun y =>
+             lossFilteredTaggedFiber M Y (t + 1) y D).card ≤
+-          ∑ t in Finset.range H,
++          ∑ t ∈ Finset.range H,
+             (B.biUnion fun y =>
+               lossFilteredTaggedFiber M Y (t + 1) y D).card := houter
+-      _ ≤ ∑ t in Finset.range H, ∑ y in B,
++      _ ≤ ∑ t ∈ Finset.range H, ∑ y ∈ B,
+           (lossFilteredTaggedFiber M Y (t + 1) y D).card := by
+             apply Finset.sum_le_sum
+             intro t ht
+             exact hinner t ht
+   have hcardQ :
+       ((lossFilteredTransportedSources M Y H B D).card : ℚ) ≤
+-        ∑ t in Finset.range H, ∑ y in B,
++        ∑ t ∈ Finset.range H, ∑ y ∈ B,
+           ((lossFilteredTaggedFiber M Y (t + 1) y D).card : ℚ) := by
+     exact_mod_cast hcardNat
+   let K : ℚ := 1 + 3 * D * (2 : ℚ) ^ M / (Y : ℚ)
+   calc
+     ((lossFilteredTransportedSources M Y H B D).card : ℚ) ≤
+-        ∑ t in Finset.range H, ∑ y in B,
++        ∑ t ∈ Finset.range H, ∑ y ∈ B,
+           ((lossFilteredTaggedFiber M Y (t + 1) y D).card : ℚ) := hcardQ
+-    _ ≤ ∑ _t in Finset.range H, ∑ _y in B, K := by
++    _ ≤ ∑ _t ∈ Finset.range H, ∑ _y ∈ B, K := by
+       apply Finset.sum_le_sum
+       intro t _ht
+       apply Finset.sum_le_sum
+@@ -361,7 +361,7 @@
+       1 + 3 * D * (2 : ℚ) ^ M / (Y : ℚ) ≤
+           (2 : ℚ) ^ M / (Y : ℚ) +
+             3 * D * (2 : ℚ) ^ M / (Y : ℚ) :=
+-        add_le_add_right hratio _
++        add_le_add_left hratio _
+       _ = (1 + 3 * D) * (2 : ℚ) ^ M / (Y : ℚ) := by ring
+   have hbase := lossFiltered_arbitraryTarget_transport
+     (M := M) (Y := Y) (H := H) (D := D) B hY hD hsmall
+diff -ruN pa/FirstPassageLinearTransport/NestedRecertification.lean pb/FirstPassageLinearTransport/NestedRecertification.lean
+--- pa/FirstPassageLinearTransport/NestedRecertification.lean	2026-09-25 19:32:24.386024140 +0900
++++ pb/FirstPassageLinearTransport/NestedRecertification.lean	2026-09-25 19:32:24.389024143 +0900
+@@ -76,7 +76,6 @@
+   rw [scaledReverseLoss, reverseLossTotal_add]
+   simp only [scaledReverseLoss]
+   field_simp [hYhiQ]
+-  ring
+ 
+ /-- A first-passage block of length `h` has scaled reverse loss at most
+ `h / 2` at its own threshold. -/
+@@ -87,8 +86,8 @@
+       reverseLossTotal n h ≤ (h : ℚ) / (2 * (Y : ℚ)) := by
+     unfold reverseLossTotal
+     calc
+-      ∑ i in Finset.range h, reverseLoss n i ≤
+-          ∑ _i in Finset.range h, (1 / (2 * (Y : ℚ)) : ℚ) := by
++      ∑ i ∈ Finset.range h, reverseLoss n i ≤
++          ∑ _i ∈ Finset.range h, (1 / (2 * (Y : ℚ)) : ℚ) := by
+             apply Finset.sum_le_sum
+             intro i hi
+             exact reverseLoss_le_firstPassage hY hfp
+@@ -105,7 +104,6 @@
+     _ = (h : ℚ) / 2 := by
+       have hYne : (Y : ℚ) ≠ 0 := by exact_mod_cast (Nat.ne_of_gt hY)
+       field_simp [hYne]
+-      ring
+ 
+ end
+ 
+diff -ruN pa/FirstPassageLinearTransport/Parameters.lean pb/FirstPassageLinearTransport/Parameters.lean
+--- pa/FirstPassageLinearTransport/Parameters.lean	2026-09-25 19:32:24.399024155 +0900
++++ pb/FirstPassageLinearTransport/Parameters.lean	2026-09-25 19:32:24.402024159 +0900
+@@ -3,7 +3,7 @@
+ Released under Apache 2.0 license as described in the file LICENSE.
+ Authors: Idris Ali Shaik
+ -/
+-import Mathlib.Analysis.SpecialFunctions.Pow.Asymptotics
++import Mathlib
+ import FirstPassageLinearTransport.Pullback
+ 
+ /-!
+diff -ruN pa/FirstPassageLinearTransport/Parity.lean pb/FirstPassageLinearTransport/Parity.lean
+--- pa/FirstPassageLinearTransport/Parity.lean	2026-09-25 19:32:24.412024171 +0900
++++ pb/FirstPassageLinearTransport/Parity.lean	2026-09-25 19:32:24.415024175 +0900
+@@ -163,7 +163,7 @@
+ /-- Integer correction term obtained after multiplying the affine iterate by
+ `2^k`. -/
+ def affineCorrection (n k : ℕ) : ℕ :=
+-  ∑ i in Finset.range k,
++  ∑ i ∈ Finset.range k,
+     (parityBit n i : ℕ) * 2 ^ i *
+       3 ^ (oddCount n k - oddCount n (i + 1))
+ 
+@@ -229,7 +229,7 @@
+ 
+ /-- The correction term in the rational normalization printed in the paper. -/
+ def affineCorrectionQ (n k : ℕ) : ℚ :=
+-  ∑ i in Finset.range k,
++  ∑ i ∈ Finset.range k,
+     ((parityBit n i : ℕ) : ℚ) *
+       (3 : ℚ) ^ (oddCount n k - oddCount n (i + 1)) /
+         (2 : ℚ) ^ (k - i)
+@@ -246,7 +246,7 @@
+   have hk : k = i + (k - i) := by omega
+   rw [hk, pow_add]
+   field_simp
+-  ring
++  rw [Nat.add_sub_cancel_left]
+ 
+ /-- Exact affine iteration in the literal rational form used by the manuscript. -/
+ theorem exact_affine_iterate (n k : ℕ) :
+@@ -269,13 +269,13 @@
+ theorem exact_affine_iterate_real (n k : ℕ) :
+     (orbit k n : ℝ) =
+       (3 : ℝ) ^ (oddCount n k) / (2 : ℝ) ^ k * (n : ℝ) +
+-        ∑ i in Finset.range k,
++        ∑ i ∈ Finset.range k,
+           ((parityBit n i : ℕ) : ℝ) *
+             (3 : ℝ) ^ (oddCount n k - oddCount n (i + 1)) /
+               (2 : ℝ) ^ (k - i) := by
+   have hcorrection :
+       (affineCorrection n k : ℝ) / (2 : ℝ) ^ k =
+-        ∑ i in Finset.range k,
++        ∑ i ∈ Finset.range k,
+           ((parityBit n i : ℕ) : ℝ) *
+             (3 : ℝ) ^ (oddCount n k - oddCount n (i + 1)) /
+               (2 : ℝ) ^ (k - i) := by
+@@ -289,7 +289,7 @@
+     have hk : k = i + (k - i) := by omega
+     rw [hk, pow_add]
+     field_simp
+-    ring
++    rw [Nat.add_sub_cancel_left]
+   rw [← hcorrection]
+   rw [div_mul_eq_mul_div, ← add_div]
+   have hpow : (2 : ℝ) ^ k ≠ 0 := pow_ne_zero _ (by norm_num)
+diff -ruN pa/FirstPassageLinearTransport/PolylogTerminalSchedule.lean pb/FirstPassageLinearTransport/PolylogTerminalSchedule.lean
+--- pa/FirstPassageLinearTransport/PolylogTerminalSchedule.lean	2026-09-25 19:32:24.425024187 +0900
++++ pb/FirstPassageLinearTransport/PolylogTerminalSchedule.lean	2026-09-25 19:32:24.428024191 +0900
+@@ -3,8 +3,7 @@
+ Released under Apache 2.0 license as described in the file LICENSE.
+ Authors: Idris Ali Shaik
+ -/
+-import Mathlib.Analysis.SpecialFunctions.Pow.Asymptotics
+-import Mathlib.Analysis.SpecialFunctions.Log.Base
++import Mathlib
+ 
+ /-!
+ # Canonical polylogarithmic terminal schedule
+diff -ruN pa/FirstPassageLinearTransport/Pullback.lean pb/FirstPassageLinearTransport/Pullback.lean
+--- pa/FirstPassageLinearTransport/Pullback.lean	2026-09-25 19:32:24.439024204 +0900
++++ pb/FirstPassageLinearTransport/Pullback.lean	2026-09-25 19:32:24.442024208 +0900
+@@ -367,7 +367,6 @@
+         rw [show (1 : ℝ) - D = 1 + (-D) by ring,
+           Real.rpow_add hYreal, Real.rpow_one]
+         field_simp
+-        ring
+   have hfloor := targetScale_rpow_neg_le p.r_pos.le hS.D_pos.le hS.D_le_one
+     (M := M)
+   calc
+@@ -421,7 +420,6 @@
+             ((D * M) ^ 2 *
+               Real.exp (-(transportGap r chi * (D * M)))) := by
+         field_simp [hDne]
+-        ring
+       _ ≤ D⁻¹ ^ 2 * (4 / transportGap r chi ^ 2) :=
+         mul_le_mul_of_nonneg_left hpay (by positivity)
+       _ = (4 / transportGap r chi ^ 2) * D⁻¹ ^ 2 := by ring
+diff -ruN pa/FirstPassageLinearTransport/RankScaledLoss.lean pb/FirstPassageLinearTransport/RankScaledLoss.lean
+--- pa/FirstPassageLinearTransport/RankScaledLoss.lean	2026-09-25 19:32:24.452024220 +0900
++++ pb/FirstPassageLinearTransport/RankScaledLoss.lean	2026-09-25 19:32:24.455024224 +0900
+@@ -49,7 +49,6 @@
+       rw [pow_succ]
+       have hp : (2 : ℚ) ^ d ≠ 0 := pow_ne_zero _ (by norm_num)
+       field_simp [hp]
+-      ring
+ 
+ /-- One numerical rank step preserves the budget `(q + 2) / r`.  The old
+ threshold has rank `q + d + 1`, so at least one bit of scale is gained. -/
+@@ -74,11 +73,12 @@
+           ((q + 1 : ℕ) : ℚ) / (2 * r) := add_le_add hold hlocal
+     _ ≤ ((((q + 3 : ℕ) : ℚ) / 2) / r) +
+           ((q + 1 : ℕ) : ℚ) / (2 * r) := by
+-      apply add_le_add_right _ _
++      apply add_le_add_left _ _
+       convert hweightR using 1
+       all_goals ring
+     _ = ((q + 2 : ℕ) : ℚ) / r := by
+       field_simp [ne_of_gt hr]
++      push_cast
+       ring
+ 
+ /-- Applied form of the numerical step for two concatenated first-passage
+diff -ruN pa/FirstPassageLinearTransport/TerminalProfile.lean pb/FirstPassageLinearTransport/TerminalProfile.lean
+--- pa/FirstPassageLinearTransport/TerminalProfile.lean	2026-09-25 19:32:24.504024283 +0900
++++ pb/FirstPassageLinearTransport/TerminalProfile.lean	2026-09-25 19:32:24.508024288 +0900
+@@ -27,7 +27,7 @@
+     (hsmall : ∀ q ∈ Finset.Icc L U,
+       ((((q + 2 : ℕ) : ℚ) / r) / ((2 ^ q : ℕ) : ℚ)) ≤ 1 / 3) :
+     ((generatedFirstBadSources M L U H r t).card : ℝ) ≤
+-      ∑ q in Finset.Icc L U,
++      ∑ q ∈ Finset.Icc L U,
+         (H : ℝ) * (1 + 3 * (((q + 2 : ℕ) : ℝ) / (r : ℝ))) *
+           (2 : ℝ) ^ M / (2 : ℝ) ^ q * ((landingBad q t).card : ℝ) := by
+   have h := generatedFirstBadSources_card_le (H := H) t hr hUM hsmall
+@@ -99,7 +99,7 @@
+     (hb' : 0 < b') (hbb' : b' < b)
+     (hc' : 0 < c') (hc2 : c' < Real.log 2)
+     (L U : ℕ) :
+-    ∑ q in Finset.Icc L U,
++    ∑ q ∈ Finset.Icc L U,
+         ((q + 1 : ℕ) : ℝ) *
+           (Real.exp (-(Real.log 2 * (q : ℝ))) +
+             Real.exp b * Real.exp (-(b * (q : ℝ)))) ≤
+@@ -110,32 +110,32 @@
+   have hdyadic := weighted_exp_Icc_le hc' hc2 L U
+   have hentropy := weighted_exp_Icc_le hb' hbb' L U
+   calc
+-    ∑ q in Finset.Icc L U,
++    ∑ q ∈ Finset.Icc L U,
+         ((q + 1 : ℕ) : ℝ) *
+           (Real.exp (-(Real.log 2 * (q : ℝ))) +
+             Real.exp b * Real.exp (-(b * (q : ℝ)))) =
+-        (∑ q in Finset.Icc L U,
++        (∑ q ∈ Finset.Icc L U,
+           ((q + 1 : ℕ) : ℝ) *
+             Real.exp (-(Real.log 2 * (q : ℝ)))) +
+         Real.exp b *
+-          (∑ q in Finset.Icc L U,
++          (∑ q ∈ Finset.Icc L U,
+             ((q + 1 : ℕ) : ℝ) *
+               Real.exp (-(b * (q : ℝ)))) := by
+       simp_rw [mul_add]
+       rw [Finset.sum_add_distrib]
+       congr 1
+       calc
+-        ∑ q in Finset.Icc L U,
++        ∑ q ∈ Finset.Icc L U,
+             ((q + 1 : ℕ) : ℝ) *
+               (Real.exp b * Real.exp (-(b * (q : ℝ)))) =
+-            ∑ q in Finset.Icc L U,
++            ∑ q ∈ Finset.Icc L U,
+               Real.exp b * (((q + 1 : ℕ) : ℝ) *
+                 Real.exp (-(b * (q : ℝ)))) := by
+           apply Finset.sum_congr rfl
+           intro q hq
+           ring
+         _ = Real.exp b *
+-            (∑ q in Finset.Icc L U,
++            (∑ q ∈ Finset.Icc L U,
+               ((q + 1 : ℕ) : ℝ) *
+                 Real.exp (-(b * (q : ℝ)))) :=
+           (Finset.mul_sum (Finset.Icc L U)
+@@ -225,29 +225,29 @@
+   have hsum :
+       ((generatedFirstBadSources M L U H r t).card : ℝ) ≤
+         (2 : ℝ) ^ M *
+-          ((H : ℝ) * C * ∑ q in Finset.Icc L U, profile q) := by
++          ((H : ℝ) * C * ∑ q ∈ Finset.Icc L U, profile q) := by
+     calc
+       ((generatedFirstBadSources M L U H r t).card : ℝ) ≤
+-          ∑ q in Finset.Icc L U,
++          ∑ q ∈ Finset.Icc L U,
+             (H : ℝ) *
+               (1 + 3 * (((q + 2 : ℕ) : ℝ) / (r : ℝ))) *
+               (2 : ℝ) ^ M / (2 : ℝ) ^ q *
+                 ((landingBad q t).card : ℝ) := hcard
+-      _ ≤ ∑ q in Finset.Icc L U,
++      _ ≤ ∑ q ∈ Finset.Icc L U,
+           (2 : ℝ) ^ M * ((H : ℝ) * C * profile q) := by
+         exact Finset.sum_le_sum hsummand
+       _ = (2 : ℝ) ^ M *
+-          ((H : ℝ) * C * ∑ q in Finset.Icc L U, profile q) := by
++          ((H : ℝ) * C * ∑ q ∈ Finset.Icc L U, profile q) := by
+         rw [Finset.mul_sum, Finset.mul_sum]
+   have hnormalized :
+       ((generatedFirstBadSources M L U H r t).card : ℝ) /
+           (2 : ℝ) ^ M ≤
+-        (H : ℝ) * C * ∑ q in Finset.Icc L U, profile q := by
++        (H : ℝ) * C * ∑ q ∈ Finset.Icc L U, profile q := by
+     apply (div_le_iff₀ hpowM).2
+     simpa [mul_assoc, mul_left_comm, mul_comm] using hsum
+   have htail := terminal_rank_sum_le hb' hbb' hc' hc2 L U
+   have htailProfile :
+-      ∑ q in Finset.Icc L U, profile q ≤
++      ∑ q ∈ Finset.Icc L U, profile q ≤
+         weightedTailConstant (Real.log 2) c' *
+             Real.exp (-(c' * (L : ℝ))) +
+           Real.exp b * weightedTailConstant b b' *
+diff -ruN pa/FirstPassageLinearTransport/TerminalTail.lean pb/FirstPassageLinearTransport/TerminalTail.lean
+--- pa/FirstPassageLinearTransport/TerminalTail.lean	2026-09-25 19:32:24.518024301 +0900
++++ pb/FirstPassageLinearTransport/TerminalTail.lean	2026-09-25 19:32:24.521024304 +0900
+@@ -3,7 +3,7 @@
+ Released under Apache 2.0 license as described in the file LICENSE.
+ Authors: Idris Ali Shaik
+ -/
+-import Mathlib.Algebra.GeomSum
++import Mathlib
+ import FirstPassageLinearTransport.RecertificationRun
+ 
+ /-!
+@@ -47,6 +47,7 @@
+             ((q + 1 : ℕ) : ℝ) + (g * (q : ℝ) + 1 / g) := by
+         dsimp [C]
+         field_simp [ne_of_gt hg]
++        push_cast
+         ring
+       rw [hrearrange]
+       exact le_add_of_nonneg_right hextra
+@@ -70,7 +71,7 @@
+ /-- Finite weighted exponential tails retain every strict smaller rate. -/
+ theorem weighted_exp_Icc_le
+     {c c' : ℝ} (hc' : 0 < c') (hcc' : c' < c) (L U : ℕ) :
+-    ∑ q in Finset.Icc L U,
++    ∑ q ∈ Finset.Icc L U,
+         ((q + 1 : ℕ) : ℝ) * Real.exp (-(c * (q : ℝ))) ≤
+       weightedTailConstant c c' * Real.exp (-(c' * (L : ℝ))) := by
+   let a := Real.exp (-c')
+@@ -80,21 +81,21 @@
+     dsimp [a]
+     exact Real.exp_lt_one_iff.mpr (by linarith)
+   have hsum :
+-      ∑ q in Finset.Icc L U,
++      ∑ q ∈ Finset.Icc L U,
+           ((q + 1 : ℕ) : ℝ) * Real.exp (-(c * (q : ℝ))) ≤
+-        ∑ q in Finset.Icc L U, C * a ^ q := by
++        ∑ q ∈ Finset.Icc L U, C * a ^ q := by
+     apply Finset.sum_le_sum
+     intro q hq
+     simpa [C, a] using weighted_exp_term_le hcc' q
+   have hgeom :
+-      ∑ q in Finset.Icc L U, a ^ q ≤ a ^ L / (1 - a) := by
+-    rw [← Nat.Ico_succ_right]
++      ∑ q ∈ Finset.Icc L U, a ^ q ≤ a ^ L / (1 - a) := by
++    rw [← Finset.Ico_add_one_right_eq_Icc]
+     exact geom_sum_Ico_le_of_lt_one ha0 ha1
+   calc
+-    ∑ q in Finset.Icc L U,
++    ∑ q ∈ Finset.Icc L U,
+         ((q + 1 : ℕ) : ℝ) * Real.exp (-(c * (q : ℝ))) ≤
+-        ∑ q in Finset.Icc L U, C * a ^ q := hsum
+-    _ = C * ∑ q in Finset.Icc L U, a ^ q := by
++        ∑ q ∈ Finset.Icc L U, C * a ^ q := hsum
++    _ = C * ∑ q ∈ Finset.Icc L U, a ^ q := by
+       rw [Finset.mul_sum]
+     _ ≤ C * (a ^ L / (1 - a)) := by
+       exact mul_le_mul_of_nonneg_left hgeom (by
+diff -ruN pa/FirstPassageLinearTransport/TerminalTailAsymptotics.lean pb/FirstPassageLinearTransport/TerminalTailAsymptotics.lean
+--- pa/FirstPassageLinearTransport/TerminalTailAsymptotics.lean	2026-09-25 19:32:24.531024316 +0900
++++ pb/FirstPassageLinearTransport/TerminalTailAsymptotics.lean	2026-09-25 19:32:24.534024320 +0900
+@@ -136,7 +136,6 @@
+       simp only [Real.logb]
+       congr 1
+       field_simp [ne_of_gt hlog2]
+-      ring
+ 
+ end
+ 
+diff -ruN pa/FirstPassageLinearTransport/Transport.lean pb/FirstPassageLinearTransport/Transport.lean
+--- pa/FirstPassageLinearTransport/Transport.lean	2026-09-25 19:32:24.544024332 +0900
++++ pb/FirstPassageLinearTransport/Transport.lean	2026-09-25 19:32:24.547024336 +0900
+@@ -87,7 +87,7 @@
+ 
+ theorem card_biUnion_le_sum {α β : Type*} [DecidableEq α] [DecidableEq β]
+     (s : Finset α) (f : α → Finset β) :
+-    (s.biUnion f).card ≤ ∑ a in s, (f a).card := by
++    (s.biUnion f).card ≤ ∑ a ∈ s, (f a).card := by
+   induction s using Finset.induction_on with
+   | empty => simp
+   | @insert a s ha ih =>
+@@ -95,8 +95,8 @@
+       calc
+         (f a ∪ s.biUnion f).card ≤ (f a).card + (s.biUnion f).card :=
+           Finset.card_union_le _ _
+-        _ ≤ (f a).card + ∑ x in s, (f x).card := by omega
+-        _ = ∑ x in insert a s, (f x).card := by simp [ha]
++        _ ≤ (f a).card + ∑ x ∈ s, (f x).card := by omega
++        _ = ∑ x ∈ insert a s, (f x).card := by simp [ha]
+ 
+ /-- All sources represented by a target cell with passage time in `1,...,H`.
+ The `range H` parametrization uses the actual time `t+1`. -/
+@@ -145,35 +145,35 @@
+   have hinner :
+       ∀ t ∈ Finset.range H,
+         (B.biUnion fun y => taggedFiber M Y (t + 1) y).card ≤
+-          ∑ y in B, (taggedFiber M Y (t + 1) y).card := by
++          ∑ y ∈ B, (taggedFiber M Y (t + 1) y).card := by
+     intro t _ht
+     exact card_biUnion_le_sum B fun y => taggedFiber M Y (t + 1) y
+   have hcardNat :
+       (transportedSources M Y H B).card ≤
+-        ∑ t in Finset.range H, ∑ y in B,
++        ∑ t ∈ Finset.range H, ∑ y ∈ B,
+           (taggedFiber M Y (t + 1) y).card := by
+     unfold transportedSources
+     calc
+       ((Finset.range H).biUnion fun t =>
+           B.biUnion fun y => taggedFiber M Y (t + 1) y).card ≤
+-          ∑ t in Finset.range H,
++          ∑ t ∈ Finset.range H,
+             (B.biUnion fun y => taggedFiber M Y (t + 1) y).card := houter
+-      _ ≤ ∑ t in Finset.range H, ∑ y in B,
++      _ ≤ ∑ t ∈ Finset.range H, ∑ y ∈ B,
+           (taggedFiber M Y (t + 1) y).card := by
+             apply Finset.sum_le_sum
+             intro t ht
+             exact hinner t ht
+   have hcardQ :
+       ((transportedSources M Y H B).card : ℚ) ≤
+-        ∑ t in Finset.range H, ∑ y in B,
++        ∑ t ∈ Finset.range H, ∑ y ∈ B,
+           ((taggedFiber M Y (t + 1) y).card : ℚ) := by
+     exact_mod_cast hcardNat
+   let K : ℚ := (5 / 2 : ℚ) * (H : ℚ) * (2 : ℚ) ^ M / (Y : ℚ)
+   calc
+     ((transportedSources M Y H B).card : ℚ) ≤
+-        ∑ t in Finset.range H, ∑ y in B,
++        ∑ t ∈ Finset.range H, ∑ y ∈ B,
+           ((taggedFiber M Y (t + 1) y).card : ℚ) := hcardQ
+-    _ ≤ ∑ _t in Finset.range H, ∑ _y in B, K := by
++    _ ≤ ∑ _t ∈ Finset.range H, ∑ _y ∈ B, K := by
+       apply Finset.sum_le_sum
+       intro t ht
+       apply Finset.sum_le_sum

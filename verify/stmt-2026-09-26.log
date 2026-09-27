@@ -1,0 +1,142 @@
+# 2026-09-26T14:32:37+09:00 lake env lean verify/Stmt.lean
+Collatz.nd_collatz_uniform_explicit : ∃ K,
+  And (@LT.lt Real Real.instLT (@OfNat.ofNat Real (nat_lit 0) (@Zero.toOfNat0 Real Real.instZero)) K)
+    (∀ (N0 : Nat),
+      @LE.le Nat instLENat (@OfNat.ofNat Nat (nat_lit 1) (instOfNatNat (nat_lit 1))) N0 →
+        ∀ (X : Nat),
+          @LE.le Real Real.instLE
+            (@Nat.cast Real Real.instNatCast
+              (@Finset.card Nat
+                ({N ∈
+                    @Finset.Icc Nat Nat.instPreorder Nat.instLocallyFiniteOrder
+                      (@OfNat.ofNat Nat (nat_lit 1) (instOfNatNat (nat_lit 1))) X |
+                  ∀ (m : Nat), @LT.lt Nat instLTNat N0 (@Nat.iterate Nat Collatz.col m N)})))
+            (@HMul.hMul Real Real Real (@instHMul Real Real.instMul)
+              (@HMul.hMul Real Real Real (@instHMul Real Real.instMul) K
+                (@HPow.hPow Real Real Real (@instHPow Real Real Real.instPow) (@Nat.cast Real Real.instNatCast N0)
+                  (@Neg.neg Real Real.instNeg Collatz.tstarExponent)))
+              (@Nat.cast Real Real.instNatCast X)))
+Collatz.nd_collatz_uniform : ∃ K c',
+  And (@LT.lt Real Real.instLT (@OfNat.ofNat Real (nat_lit 0) (@Zero.toOfNat0 Real Real.instZero)) c')
+    (∀ (N0 : Nat),
+      @LE.le Nat instLENat (@OfNat.ofNat Nat (nat_lit 1) (instOfNatNat (nat_lit 1))) N0 →
+        ∀ (X : Nat),
+          @LE.le Real Real.instLE
+            (@Nat.cast Real Real.instNatCast
+              (@Finset.card Nat
+                ({N ∈
+                    @Finset.Icc Nat Nat.instPreorder Nat.instLocallyFiniteOrder
+                      (@OfNat.ofNat Nat (nat_lit 1) (instOfNatNat (nat_lit 1))) X |
+                  ∀ (m : Nat), @LT.lt Nat instLTNat N0 (@Nat.iterate Nat Collatz.col m N)})))
+            (@HMul.hMul Real Real Real (@instHMul Real Real.instMul)
+              (@HMul.hMul Real Real Real (@instHMul Real Real.instMul) K
+                (@HPow.hPow Real Real Real (@instHPow Real Real Real.instPow) (@Nat.cast Real Real.instNatCast N0)
+                  (@Neg.neg Real Real.instNeg c')))
+              (@Nat.cast Real Real.instNatCast X)))
+def Collatz.col : (n : Nat) → Nat :=
+fun (n : Nat) =>
+  @ite.{1} Nat
+    (@Eq.{1} Nat
+      (@HMod.hMod.{0, 0, 0} Nat Nat Nat (@instHMod.{0} Nat Nat.instMod) n
+        (@OfNat.ofNat.{0} Nat (nat_lit 2) (instOfNatNat (nat_lit 2))))
+      (@OfNat.ofNat.{0} Nat (nat_lit 0) (instOfNatNat (nat_lit 0))))
+    (instDecidableEqNat
+      (@HMod.hMod.{0, 0, 0} Nat Nat Nat (@instHMod.{0} Nat Nat.instMod) n
+        (@OfNat.ofNat.{0} Nat (nat_lit 2) (instOfNatNat (nat_lit 2))))
+      (@OfNat.ofNat.{0} Nat (nat_lit 0) (instOfNatNat (nat_lit 0))))
+    (@HDiv.hDiv.{0, 0, 0} Nat Nat Nat (@instHDiv.{0} Nat Nat.instDiv) n
+      (@OfNat.ofNat.{0} Nat (nat_lit 2) (instOfNatNat (nat_lit 2))))
+    (@HAdd.hAdd.{0, 0, 0} Nat Nat Nat (@instHAdd.{0} Nat instAddNat)
+      (@HMul.hMul.{0, 0, 0} Nat Nat Nat (@instHMul.{0} Nat instMulNat)
+        (@OfNat.ofNat.{0} Nat (nat_lit 3) (instOfNatNat (nat_lit 3))) n)
+      (@OfNat.ofNat.{0} Nat (nat_lit 1) (instOfNatNat (nat_lit 1))))
+def Collatz.tstarExponent : ℝ :=
+Collatz.cB * min (1 / 80) (1 / 40 / 2) / (2 * Real.log 2)
+def Collatz.cB : ℝ :=
+min (FirstPassageLinearTransport.FixedBarrier.fbRate / 2) (Real.log 2 / 2)
+def FirstPassageLinearTransport.FixedBarrier.fbFixedRate : ℝ :=
+min (FirstPassageLinearTransport.FixedBarrier.fbRate / 2) (Real.log 2 / 2)
+'Collatz.nd_collatz_uniform_explicit' depends on axioms: [propext, Classical.choice, Quot.sound]
+'Collatz.nd_collatz_uniform' depends on axioms: [propext, Classical.choice, Quot.sound]
+'Collatz.tstarExponent_eq' depends on axioms: [propext, Classical.choice, Quot.sound]
+'Collatz.tstarExponent_pos' depends on axioms: [propext, Classical.choice, Quot.sound]
+'Collatz.fixedBarrier_failure_count_explicit' depends on axioms: [propext, Classical.choice, Quot.sound]
+'FirstPassageLinearTransport.FixedBarrier.fixedBarrier_failure_count' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'FirstPassageLinearTransport.FixedBarrier.fixedBarrier_failure_count_rate' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+FirstPassageLinearTransport.FixedBarrier.fixedBarrier_failure_count_rate : ∃ C,
+  And (@LT.lt Real Real.instLT (@OfNat.ofNat Real (nat_lit 0) (@Zero.toOfNat0 Real Real.instZero)) C)
+    (∃ L0,
+      ∀ (L M : Nat),
+        @LE.le Nat instLENat L0 L →
+          @LE.le Nat instLENat L M →
+            @LE.le Real Real.instLE
+              (@Nat.cast Real Real.instNatCast
+                (@Finset.card Nat
+                  ({n ∈
+                      @Finset.Ico Nat Nat.instPreorder Nat.instLocallyFiniteOrder
+                        (@HPow.hPow Nat Nat Nat (@instHPow Nat Nat (@Monoid.toPow Nat Nat.instMonoid))
+                          (@OfNat.ofNat Nat (nat_lit 2) (instOfNatNat (nat_lit 2))) M)
+                        (@HPow.hPow Nat Nat Nat (@instHPow Nat Nat (@Monoid.toPow Nat Nat.instMonoid))
+                          (@OfNat.ofNat Nat (nat_lit 2) (instOfNatNat (nat_lit 2)))
+                          (@HAdd.hAdd Nat Nat Nat (@instHAdd Nat instAddNat) M
+                            (@OfNat.ofNat Nat (nat_lit 1) (instOfNatNat (nat_lit 1))))) |
+                    ∀ (k : Nat),
+                      @LE.le Nat instLENat
+                        (@HPow.hPow Nat Nat Nat (@instHPow Nat Nat (@Monoid.toPow Nat Nat.instMonoid))
+                          (@OfNat.ofNat Nat (nat_lit 2) (instOfNatNat (nat_lit 2))) L)
+                        (@Nat.iterate Nat FirstPassageLinearTransport.shortcut k n)})))
+              (@HMul.hMul Real Real Real (@instHMul Real Real.instMul)
+                (@HMul.hMul Real Real Real (@instHMul Real Real.instMul)
+                  (@HMul.hMul Real Real Real (@instHMul Real Real.instMul)
+                    (@HMul.hMul Real Real Real (@instHMul Real Real.instMul) C
+                      (@HPow.hPow Real Nat Real (@instHPow Real Nat (@Monoid.toPow Real Real.instMonoid))
+                        (@OfNat.ofNat Real (nat_lit 2) (@instOfNatAtLeastTwo Real (nat_lit 2) Real.instNatCast ⋯)) M))
+                    (@HAdd.hAdd Real Real Real (@instHAdd Real Real.instAdd) (@Nat.cast Real Real.instNatCast M)
+                      (@OfNat.ofNat Real (nat_lit 1) (@One.toOfNat1 Real Real.instOne))))
+                  (@HAdd.hAdd Real Real Real (@instHAdd Real Real.instAdd) (@Nat.cast Real Real.instNatCast L)
+                    (@OfNat.ofNat Real (nat_lit 1) (@One.toOfNat1 Real Real.instOne))))
+                (Real.exp
+                  (@Neg.neg Real Real.instNeg
+                    (@HMul.hMul Real Real Real (@instHMul Real Real.instMul)
+                      FirstPassageLinearTransport.FixedBarrier.fbFixedRate (@Nat.cast Real Real.instNatCast L))))))
+def FirstPassageLinearTransport.shortcut : (n : Nat) → Nat :=
+fun (n : Nat) =>
+  @ite.{1} Nat
+    (@Eq.{1} Nat
+      (@HMod.hMod.{0, 0, 0} Nat Nat Nat (@instHMod.{0} Nat Nat.instMod) n
+        (@OfNat.ofNat.{0} Nat (nat_lit 2) (instOfNatNat (nat_lit 2))))
+      (@OfNat.ofNat.{0} Nat (nat_lit 0) (instOfNatNat (nat_lit 0))))
+    (instDecidableEqNat
+      (@HMod.hMod.{0, 0, 0} Nat Nat Nat (@instHMod.{0} Nat Nat.instMod) n
+        (@OfNat.ofNat.{0} Nat (nat_lit 2) (instOfNatNat (nat_lit 2))))
+      (@OfNat.ofNat.{0} Nat (nat_lit 0) (instOfNatNat (nat_lit 0))))
+    (@HDiv.hDiv.{0, 0, 0} Nat Nat Nat (@instHDiv.{0} Nat Nat.instDiv) n
+      (@OfNat.ofNat.{0} Nat (nat_lit 2) (instOfNatNat (nat_lit 2))))
+    (@HDiv.hDiv.{0, 0, 0} Nat Nat Nat (@instHDiv.{0} Nat Nat.instDiv)
+      (@HAdd.hAdd.{0, 0, 0} Nat Nat Nat (@instHAdd.{0} Nat instAddNat)
+        (@HMul.hMul.{0, 0, 0} Nat Nat Nat (@instHMul.{0} Nat instMulNat)
+          (@OfNat.ofNat.{0} Nat (nat_lit 3) (instOfNatNat (nat_lit 3))) n)
+        (@OfNat.ofNat.{0} Nat (nat_lit 1) (instOfNatNat (nat_lit 1))))
+      (@OfNat.ofNat.{0} Nat (nat_lit 2) (instOfNatNat (nat_lit 2))))
+Collatz.nd_collatz_uniform : ∃ K c',
+  And (@LT.lt Real Real.instLT (@OfNat.ofNat Real (nat_lit 0) (@Zero.toOfNat0 Real Real.instZero)) c')
+    (∀ (N0 : Nat),
+      @LE.le Nat instLENat (@OfNat.ofNat Nat (nat_lit 1) (instOfNatNat (nat_lit 1))) N0 →
+        ∀ (X : Nat),
+          @LE.le Real Real.instLE
+            (@Nat.cast Real Real.instNatCast
+              (@Finset.card Nat
+                ({N ∈
+                    @Finset.Icc Nat Nat.instPreorder Nat.instLocallyFiniteOrder
+                      (@OfNat.ofNat Nat (nat_lit 1) (instOfNatNat (nat_lit 1))) X |
+                  ∀ (m : Nat), @LT.lt Nat instLTNat N0 (@Nat.iterate Nat Collatz.col m N)})))
+            (@HMul.hMul Real Real Real (@instHMul Real Real.instMul)
+              (@HMul.hMul Real Real Real (@instHMul Real Real.instMul) K
+                (@HPow.hPow Real Real Real (@instHPow Real Real Real.instPow) (@Nat.cast Real Real.instNatCast N0)
+                  (@Neg.neg Real Real.instNeg c')))
+              (@Nat.cast Real Real.instNatCast X)))
+exit=0

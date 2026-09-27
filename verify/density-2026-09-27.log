@@ -1,0 +1,156 @@
+Corollary 1.2 (CollatzND/Core/Density.lean): build, statements, axioms and closure check, 2026-09-27.
+
+Environment: a copy of this bundle (including CollatzND/Core/Density.lean), Lean v4.30.0-rc2, Mathlib v4.30.0-rc2.
+vendor/mazur and vendor/shaik are the copies produced by fetch_mazur.py and fetch_shaik.py (SHA-256 checked) in the
+source repository; the Mathlib cache and the builds of the external formalizations were reused. The 17 modules of
+this bundle were rebuilt from the bundle's own sources.
+
+== lake build (lines for the modules of this bundle) ==
+⚠ [8916/8933] Built CollatzProof.Core.Defs (4.6s)
+✔ [8917/8933] Built CollatzProof.Core.Recursion (4.5s)
+✔ [8918/8933] Built CollatzProof.Core.Step (4.7s)
+✔ [8919/8933] Built CollatzProof.Core.Syr (4.0s)
+✔ [8920/8933] Built CollatzProof.Core.TaoDefs (4.2s)
+✔ [8921/8933] Built CollatzProof.Core.TaoRec (5.6s)
+✔ [8922/8933] Built CollatzProof.Core.Conv (5.0s)
+✔ [8923/8933] Built CollatzProof.Core.TaoFinal (5.6s)
+✔ [8924/8933] Built CollatzND.Core.Bridge (4.0s)
+✔ [8925/8933] Built CollatzND.Core.Main (4.7s)
+✔ [8926/8933] Built CollatzND.Core.Col (5.2s)
+✔ [8927/8933] Built CollatzND.Spec (6.0s)
+✔ [8928/8933] Built CollatzND.Core.Power (7.4s)
+⚠ [8929/8933] Built CollatzND.Core.Uniform (21s)
+✔ [8930/8933] Built CollatzND.Core.ShaikBridge (4.5s)
+✔ [8931/8933] Built CollatzND.Core.Explicit (18s)
+✔ [8932/8933] Built CollatzND.Core.Density (6.0s)
+Build completed successfully (8933 jobs).
+(The two warnings are linter warnings in Defs.lean and Uniform.lean; Density.lean produced no message.)
+
+== lake env lean <file>, input ==
+import CollatzND.Core.Density
+#check @Collatz.nd_density_one
+#check @Collatz.nd_collatz_corollaries
+#check @Collatz.colMin_lt_iff
+#check @Collatz.lt_colMin_iff
+#print axioms Collatz.nd_density_one
+#print axioms Collatz.nd_collatz_corollaries
+#print axioms Collatz.colMin_lt_iff
+#print axioms Collatz.lt_colMin_iff
+#print axioms Collatz.Density.density_one_of
+#print axioms Collatz.Density.upper_density
+#print axioms Collatz.Density.count_Xpow
+
+== output ==
+Collatz.nd_density_one : ∀ (f : ℕ → ℝ),
+  Filter.Tendsto f Filter.atTop Filter.atTop →
+    Filter.Tendsto (fun X => ↑{N ∈ Finset.Icc 1 X | ∃ m, ↑(Collatz.col^[m] N) < f N}.card / ↑X) Filter.atTop (nhds 1)
+Collatz.nd_collatz_corollaries : ∃ K,
+  0 < K ∧
+    (∀ (N0 : ℕ),
+        1 ≤ N0 →
+          ∀ (X : ℕ),
+            ↑{N ∈ Finset.Icc 1 X | ∀ (m : ℕ), N0 < Collatz.col^[m] N}.card ≤ K * ↑N0 ^ (-Collatz.tstarExponent) * ↑X) ∧
+      (∀ (N0 : ℕ),
+          1 ≤ N0 →
+            (Filter.IsBoundedUnder (fun x1 x2 => x1 ≤ x2) Filter.atTop fun X =>
+                ↑{N ∈ Finset.Icc 1 X | ∀ (m : ℕ), N0 < Collatz.col^[m] N}.card / ↑X) ∧
+              Filter.limsup (fun X => ↑{N ∈ Finset.Icc 1 X | ∀ (m : ℕ), N0 < Collatz.col^[m] N}.card / ↑X)
+                  Filter.atTop ≤
+                K * ↑N0 ^ (-Collatz.tstarExponent)) ∧
+        ∀ (θ : ℝ),
+          0 < θ →
+            ∀ (X : ℝ),
+              1 ≤ X →
+                ↑{N ∈ Finset.Icc 1 ⌊X⌋₊ | ∀ (m : ℕ), X ^ θ < ↑(Collatz.col^[m] N)}.card ≤
+                  2 ^ Collatz.tstarExponent * K * X ^ (1 - θ * Collatz.tstarExponent)
+Collatz.colMin_lt_iff : ∀ (y : ℝ) (N : ℕ), ↑(Collatz.colMin N) < y ↔ ∃ m, ↑(Collatz.col^[m] N) < y
+Collatz.lt_colMin_iff : ∀ (b : ℝ) (N : ℕ), b < ↑(Collatz.colMin N) ↔ ∀ (m : ℕ), b < ↑(Collatz.col^[m] N)
+'Collatz.nd_density_one' depends on axioms: [propext, Classical.choice, Quot.sound]
+'Collatz.nd_collatz_corollaries' depends on axioms: [propext, Classical.choice, Quot.sound]
+'Collatz.colMin_lt_iff' depends on axioms: [propext, Classical.choice, Quot.sound]
+'Collatz.lt_colMin_iff' depends on axioms: [propext, Classical.choice, Quot.sound]
+'Collatz.Density.density_one_of' depends on axioms: [propext, Classical.choice, Quot.sound]
+'Collatz.Density.upper_density' depends on axioms: [propext, Classical.choice, Quot.sound]
+'Collatz.Density.count_Xpow' depends on axioms: [propext, Classical.choice, Quot.sound]
+
+== closure check: lake env lean --run <file> (script below) ==
+Roots: Collatz.nd_collatz_uniform_explicit, Collatz.nd_collatz_uniform, Collatz.tstarExponent_eq,
+Collatz.tstarExponent_pos, FirstPassageLinearTransport.FixedBarrier.fixedBarrier_failure_count,
+Collatz.nd_collatz_corollaries, Collatz.nd_density_one, Collatz.lt_colMin_iff, Collatz.colMin_lt_iff.
+Every non-internal declaration of the modules CollatzND.* and CollatzProof.* loaded by importing
+CollatzND.Core.Density is required to lie in the dependency closure of the roots; equation lemmas generated on
+demand by unfold/simp (f.eq_1, f.eq_def) are listed separately. Exit code 0 iff no declaration is outside.
+
+== output (exit code 0) ==
+closure size: 64857
+project modules loaded (16): #[CollatzProof.Core.Defs, CollatzProof.Core.Recursion, CollatzProof.Core.Step, CollatzProof.Core.Syr, CollatzProof.Core.TaoDefs, CollatzProof.Core.TaoRec, CollatzProof.Core.TaoFinal, CollatzProof.Core.Conv, CollatzND.Core.Bridge, CollatzND.Core.Main, CollatzND.Core.Col, CollatzND.Core.Power, CollatzND.Core.Uniform, CollatzND.Core.ShaikBridge, CollatzND.Core.Explicit, CollatzND.Core.Density]
+project declarations (non-internal): 110
+declarations of CollatzND.Core.Density (14): #[Collatz.Density.MainIneq, Collatz.Density.count_Xpow, Collatz.Density.density_one_of, Collatz.Density.half_le_floor, Collatz.Density.mainIneq_explicit, Collatz.Density.ratio_le, Collatz.Density.upper_density, Collatz.colMin, Collatz.colMin_le, Collatz.colMin_lt_iff, Collatz.colMin_mem, Collatz.lt_colMin_iff, Collatz.nd_collatz_corollaries, Collatz.nd_density_one]
+generated equation lemmas outside the closure: #[Collatz.A.eq_1]
+project declarations outside the closure of the roots: #[]
+
+== script ==
+import Lean
+open Lean
+
+def closureOf (env : Environment) (roots : Array Name) : IO NameSet := do
+  let mut seen : NameSet := {}
+  let mut stack := roots
+  while stack.size > 0 do
+    let n := stack.back!
+    stack := stack.pop
+    if seen.contains n then continue
+    seen := seen.insert n
+    match env.find? n with
+    | none => throw <| IO.userError s!"missing constant {n}"
+    | some ci =>
+      for m in ci.getUsedConstantsAsSet do
+        unless seen.contains m do stack := stack.push m
+      match ci with
+      | .inductInfo v =>
+        for c in v.ctors do stack := stack.push c
+        for a in v.all do stack := stack.push a
+      | .ctorInfo v => stack := stack.push v.induct
+      | .recInfo v => for a in v.all do stack := stack.push a
+      | _ => pure ()
+  return seen
+
+unsafe def main (_ : List String) : IO UInt32 := do
+  initSearchPath (← findSysroot)
+  let env ← importModules #[{module := `CollatzND.Core.Density}] {} (trustLevel := 0) (loadExts := false)
+  let roots : Array Name := #[`Collatz.nd_collatz_uniform_explicit, `Collatz.nd_collatz_uniform,
+    `Collatz.tstarExponent_eq, `Collatz.tstarExponent_pos,
+    `FirstPassageLinearTransport.FixedBarrier.fixedBarrier_failure_count,
+    `Collatz.nd_collatz_corollaries, `Collatz.nd_density_one,
+    `Collatz.lt_colMin_iff, `Collatz.colMin_lt_iff]
+  let cl ← closureOf env roots
+  IO.println s!"closure size: {cl.size}"
+  let mut mods : Array Name := #[]
+  for m in env.header.moduleNames do
+    if (`CollatzND.Core).isPrefixOf m || (`CollatzProof.Core).isPrefixOf m ||
+        (`CollatzND).isPrefixOf m || (`CollatzProof).isPrefixOf m then
+      mods := mods.push m
+  IO.println s!"project modules loaded ({mods.size}): {mods}"
+  let mut count := 0
+  let mut unused : Array Name := #[]
+  let mut eqns : Array Name := #[]
+  let mut densityDecls : Array Name := #[]
+  for (n, _) in env.constants.map₁.toList do
+    match env.getModuleIdxFor? n with
+    | some idx =>
+      let mod := env.header.moduleNames[idx.toNat]!
+      if ((`CollatzND).isPrefixOf mod || (`CollatzProof).isPrefixOf mod) && !n.isInternal then
+        count := count + 1
+        unless cl.contains n do
+          -- equation lemmas (`f.eq_1`, `f.eq_def`) are generated on demand by `unfold`/`simp`, not declared by hand
+          let isEqn := match n with
+            | .str _ s => s.startsWith "eq_" || s == "eq_def"
+            | _ => false
+          if isEqn then eqns := eqns.push n else unused := unused.push n
+        if mod == `CollatzND.Core.Density then densityDecls := densityDecls.push n
+    | none => pure ()
+  IO.println s!"project declarations (non-internal): {count}"
+  IO.println s!"declarations of CollatzND.Core.Density ({densityDecls.size}): {densityDecls.qsort (·.toString < ·.toString)}"
+  IO.println s!"generated equation lemmas outside the closure: {eqns}"
+  IO.println s!"project declarations outside the closure of the roots: {unused}"
+  return (if unused.isEmpty then 0 else 1)

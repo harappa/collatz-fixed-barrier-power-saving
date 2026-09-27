@@ -1,0 +1,6 @@
+# lake env leanchecker --fresh CollatzND.Core.Density   (Lean v4.30.0-rc2; source repository)
+# CollatzND.Core.Density imports CollatzND.Core.Explicit, so its dependency closure contains the main theorem and
+# Corollary 1.2 (nd_collatz_corollaries, nd_density_one). leanchecker --fresh re-verifies every declaration of the
+# closure, including Mathlib and the imported formalizations of Mazur and Shaik; it prints nothing on success.
+start 2026-09-27T03:53:52+09:00   source commit 8528d93
+exit=0 end 2026-09-27T04:26:53+09:00
